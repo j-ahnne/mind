@@ -1,0 +1,2193 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>마음 팔레트</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Jua&display=swap">
+<style>
+:root { padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px); }
+/* 마음 팔레트
+   Layout: one-screen app shell (header / scrolling stage / footer nav);
+   wide screens add a live "마음 카드" rail on the right.
+   Look: cut-paper stickers — flat mood fills, navy outlines, hard drop edges. */
+:root {
+  --bg: #ECEBFA;
+  --surface: #FFFFFF;
+  --surface-2: #F4F3FD;
+  --ink: #1B1A33;
+  --ink-2: #57567A;
+  --line: #D3D1EC;
+  --accent: #3550E0;
+  --accent-ink: #FFFFFF;
+  --accent-soft: #E2E7FF;
+  --focus: #1B1A33;
+  --edge: #1B1A33;
+  /* mood colors: same fills in every theme, always carried with a shape and a word */
+  --yellow: #FFC533; --yellow-soft: #FFF1C4;
+  --green: #4CC38A;  --green-soft: #D9F4E6;
+  --blue: #5AA2F7;   --blue-soft: #DAE9FF;
+  --red: #F2665E;    --red-soft: #FFE0DC;
+  --on-mood: #1B1A33;
+  /* chart marks for the class summary (validated per theme) */
+  --m-yellow: #E0A300; --m-green: #2FA36B; --m-blue: #3B82E0; --m-red: #E0544C;
+  /* instruments and camera overlay */
+  --wood: #C98A4B; --metal: #C9CEDD; --copper: #D8824A; --skin: #F6EAD7;
+  --cam-bg: #0C0B1C; --cam-ink: #FFFFFF; --cam-veil: rgba(12, 11, 28, .78);
+  --veil: rgba(20, 19, 42, .55);
+  --font-display: 'Jua', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
+  --font-body: 'Gowun Dodum', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', sans-serif;
+  --r-lg: 26px; --r-md: 18px; --r-sm: 12px;
+  --mood: var(--accent-soft); --mood-soft: var(--surface-2); --mood-mark: var(--accent);
+  font-size: 112.5%;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14132A; --surface: #201F3D; --surface-2: #2A2950; --ink: #F2F1FF; --ink-2: #BAB8DE;
+    --line: #3D3C6B; --accent: #93A4FF; --accent-ink: #14132A; --accent-soft: #2B2F63;
+    --focus: #FFFFFF; --edge: #0A0918;
+    --yellow-soft: #3F3511; --green-soft: #143A2A; --blue-soft: #16294B; --red-soft: #4A211E;
+    --m-yellow: #B38C0B; --m-green: #27A56C; --m-blue: #4D8FE6; --m-red: #E0605A;
+    --veil: rgba(4, 4, 12, .7);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #14132A; --surface: #201F3D; --surface-2: #2A2950; --ink: #F2F1FF; --ink-2: #BAB8DE;
+  --line: #3D3C6B; --accent: #93A4FF; --accent-ink: #14132A; --accent-soft: #2B2F63;
+  --focus: #FFFFFF; --edge: #0A0918;
+  --yellow-soft: #3F3511; --green-soft: #143A2A; --blue-soft: #16294B; --red-soft: #4A211E;
+  --m-yellow: #B38C0B; --m-green: #27A56C; --m-blue: #4D8FE6; --m-red: #E0605A;
+  --veil: rgba(4, 4, 12, .7);
+  color-scheme: dark;
+}
+/* 고대비 화면: wins over both themes (declared last, same specificity) */
+:root[data-contrast="high"] {
+  --bg: #000000; --surface: #000000; --surface-2: #121212; --ink: #FFFFFF; --ink-2: #FFFFFF;
+  --line: #FFFFFF; --accent: #FFE600; --accent-ink: #000000; --accent-soft: #2E2A00;
+  --focus: #00E5FF; --edge: #FFFFFF;
+  --yellow-soft: #1F1A00; --green-soft: #00190E; --blue-soft: #00122B; --red-soft: #240604;
+  --m-yellow: #B38C0B; --m-green: #27A56C; --m-blue: #4D8FE6; --m-red: #E0605A;
+  --veil: rgba(0, 0, 0, .82);
+  color-scheme: dark;
+}
+:root[data-text="big"] { font-size: 131.25%; }
+:root[data-text="huge"] { font-size: 150%; }
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 1rem; line-height: 1.5;
+  -webkit-text-size-adjust: 100%; overscroll-behavior: none;
+  word-break: keep-all; overflow-wrap: break-word;
+}
+[hidden] { display: none !important; }
+img, svg, video { max-width: 100%; }
+button, input, textarea { font: inherit; color: inherit; }
+button { -webkit-tap-highlight-color: transparent; }
+:focus-visible { outline: 4px solid var(--focus); outline-offset: 3px; }
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* ───────── shell ───────── */
+.app {
+  height: 100%; max-width: 1120px; margin-inline: auto; padding-inline: 16px;
+  display: grid; grid-template-rows: auto minmax(0, 1fr) auto;
+}
+
+.top { display: flex; align-items: center; gap: 10px; padding-block: 10px; flex-wrap: wrap; }
+.brand {
+  display: inline-flex; align-items: center; gap: 8px; border: 0; background: none; cursor: pointer;
+  font-family: var(--font-display); font-size: 1.25rem; color: var(--ink); padding: 4px 8px 4px 2px; border-radius: var(--r-sm);
+}
+.brand svg { width: 36px; height: 36px; flex: none; }
+.steps {
+  list-style: none; margin: 0; padding: 2px; display: flex; gap: 4px; flex: 1 1 320px; min-width: 0;
+  overflow-x: auto; scrollbar-width: none;
+}
+.steps::-webkit-scrollbar { display: none; }
+.steps button {
+  display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; cursor: pointer;
+  border: 2px solid transparent; background: transparent; color: var(--ink-2); border-radius: 999px;
+  padding: 3px 11px 3px 3px; font-family: var(--font-display); font-size: .9rem; min-height: 40px;
+}
+.steps .t { display: none; }
+.steps .is-current .t { display: inline; }
+@media (min-width: 700px) { :root:not([data-text]) .steps .t { display: inline; } }
+.steps .n {
+  width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; flex: none;
+  background: var(--surface); border: 2px solid var(--line); color: var(--ink-2); font-size: .88rem;
+}
+.steps .is-done .n { background: var(--mood); color: var(--on-mood); border-color: var(--ink); }
+.steps .is-current button { background: var(--surface); border-color: var(--ink); color: var(--ink); }
+.steps .is-current .n { border-color: var(--ink); }
+.steps .is-current:not(.is-done) .n { color: var(--ink); }
+.steps button:disabled { opacity: .45; cursor: not-allowed; }
+.top-actions { display: flex; gap: 8px; margin-left: auto; }
+
+.stage { min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; }
+.stage-main { min-height: 0; min-width: 0; overflow-y: auto; padding: 6px 6px 18px; }
+.rail { display: none; }
+@media (min-width: 940px) {
+  .stage { grid-template-columns: minmax(0, 1fr) 300px; }
+  .rail { display: block; min-height: 0; overflow-y: auto; padding: 6px 6px 18px; }
+  .app[data-screen="card"] .stage, .app[data-screen="wall"] .stage { grid-template-columns: minmax(0, 1fr); }
+  .app[data-screen="card"] .rail, .app[data-screen="wall"] .rail { display: none; }
+}
+.rail-label { font-family: var(--font-display); font-size: .95rem; color: var(--ink-2); margin: 0 0 8px; display: flex; align-items: center; gap: 8px; }
+.tag {
+  display: inline-block; font-family: var(--font-body); font-size: .72rem; letter-spacing: .04em; font-weight: 700;
+  padding: 2px 8px; border-radius: 999px; background: var(--ink); color: var(--surface);
+}
+.screen { display: grid; gap: 16px; align-content: start; }
+
+.nav {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center;
+  padding-block: 10px 12px;
+}
+.nav .btn { min-width: 108px; }
+.caption {
+  min-height: 46px; min-width: 0; display: flex; align-items: center; justify-content: center; text-align: center;
+  font-size: .92rem; line-height: 1.3; padding: 6px 14px; border-radius: 14px;
+  background: var(--ink); color: var(--bg); visibility: hidden;
+}
+.caption.on { visibility: visible; }
+.app[data-captions="off"] .caption { visibility: hidden; }
+
+/* ───────── controls ───────── */
+.btn {
+  font-family: var(--font-display); font-size: 1.05rem; line-height: 1.2; min-height: 52px; padding: 10px 20px;
+  border-radius: 999px; border: 2px solid var(--ink); background: var(--surface); color: var(--ink); cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-align: center;
+  box-shadow: 0 3px 0 var(--edge); transition: transform .08s, box-shadow .08s;
+}
+.btn:active { transform: translateY(3px); box-shadow: 0 0 0 var(--edge); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); }
+.btn.mood { background: var(--mood); color: var(--on-mood); }
+.btn.ghost { box-shadow: none; border-color: var(--line); background: transparent; }
+.btn.sm { min-height: 44px; padding: 6px 14px; font-size: .92rem; box-shadow: 0 2px 0 var(--edge); }
+.btn.xl { min-height: 66px; font-size: 1.4rem; padding: 12px 36px; }
+.btn:disabled { opacity: .5; cursor: not-allowed; box-shadow: none; transform: none; }
+.btn[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.btn svg, .method svg.ic, .say svg { width: 1.3em; height: 1.3em; flex: none; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+
+.ask { display: flex; align-items: flex-start; gap: 10px; }
+.ask h2 { font-family: var(--font-display); font-weight: 400; font-size: 1.7rem; line-height: 1.25; margin: 0; flex: 1 1 auto; min-width: 0; text-wrap: balance; }
+.say {
+  flex: none; width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--ink); background: var(--surface); color: var(--ink);
+  display: grid; place-items: center; cursor: pointer; box-shadow: 0 2px 0 var(--edge);
+}
+h3 { font-family: var(--font-display); font-weight: 400; font-size: 1.15rem; line-height: 1.3; margin: 4px 0 0; text-wrap: balance; }
+.hint {
+  display: none; margin: 0; padding: 10px 14px; border-radius: var(--r-sm); background: var(--accent-soft);
+  color: var(--ink); font-size: .95rem; max-width: 60ch;
+}
+.app[data-guide="on"] .hint { display: block; }
+.note { margin: 0; font-size: .88rem; color: var(--ink-2); max-width: 62ch; }
+.note.warn { color: var(--ink); background: var(--surface); border: 2px dashed var(--ink-2); border-radius: var(--r-sm); padding: 8px 12px; }
+
+.friend { display: block; overflow: visible; }
+.bob { animation: bob 3.2s ease-in-out infinite; transform-origin: 50% 90%; }
+@keyframes bob { 50% { transform: translateY(-4%) scale(1.02, .98); } }
+
+/* ───────── home ───────── */
+.hero { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; align-items: center; }
+@media (min-width: 620px) { .hero { grid-template-columns: 230px minmax(0, 1fr); gap: 22px; } }
+.hero-art svg { display: block; width: 100%; max-width: 230px; height: auto; margin-inline: auto; overflow: visible; }
+.hero h1 { font-family: var(--font-display); font-weight: 400; font-size: clamp(1.9rem, 5.2vw, 2.7rem); line-height: 1.15; margin: 0; text-wrap: balance; }
+.lead { margin: 8px 0 0; color: var(--ink-2); max-width: 34em; }
+.field { display: grid; gap: 6px; max-width: 360px; }
+.field label { font-family: var(--font-display); font-size: 1.05rem; }
+.field .opt { font-family: var(--font-body); font-size: .8rem; color: var(--ink-2); margin-left: 6px; }
+.field input, textarea {
+  width: 100%; min-height: 52px; padding: 10px 14px; border-radius: var(--r-sm); border: 2px solid var(--ink);
+  background: var(--surface); color: var(--ink); font-size: 1.05rem;
+}
+textarea { min-height: 84px; resize: vertical; line-height: 1.5; }
+::placeholder { color: var(--ink-2); opacity: .8; }
+.modes { border: 0; padding: 0; margin: 0; min-width: 0; }
+.modes legend { font-family: var(--font-display); font-size: 1.15rem; padding: 0; margin-bottom: 8px; }
+.mode-grid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+.mode { position: relative; display: block; cursor: pointer; }
+.mode input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.mode-body {
+  display: grid; gap: 2px; height: 100%; padding: 12px 14px; border-radius: var(--r-md); border: 2px solid var(--ink);
+  background: var(--surface); box-shadow: 0 3px 0 var(--edge);
+}
+.mode-body b { font-family: var(--font-display); font-weight: 400; font-size: 1.15rem; }
+.mode-body span { font-size: .85rem; color: var(--ink-2); }
+.mode input:checked + .mode-body { background: var(--accent); color: var(--accent-ink); }
+.mode input:checked + .mode-body span { color: var(--accent-ink); }
+.mode input:focus-visible + .mode-body { outline: 4px solid var(--focus); outline-offset: 3px; }
+
+/* ───────── 1 마음 색 ───────── */
+.meter-wrap { display: grid; gap: 6px; }
+.axis { display: flex; justify-content: space-between; gap: 8px; font-size: .82rem; color: var(--ink-2); padding-inline: 4px; }
+.meter-body { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; align-items: stretch; }
+.axis-v { display: none; }
+@media (min-width: 560px) {
+  .meter-body { grid-template-columns: auto minmax(0, 1fr); }
+  .axis-v { display: flex; flex-direction: row; justify-content: space-between; writing-mode: vertical-rl; font-size: .82rem; color: var(--ink-2); padding-block: 4px; }
+}
+.meter { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.mood-tile {
+  position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 10px; text-align: left;
+  padding: 12px 14px; min-height: 108px; border-radius: var(--r-lg); border: 3px solid var(--ink); cursor: pointer;
+  background: var(--tile); color: var(--on-mood); box-shadow: 0 4px 0 var(--edge); transition: transform .08s, box-shadow .08s;
+}
+.mood-tile .friend { width: 72px; height: 72px; }
+.mood-tile b { display: block; font-family: var(--font-display); font-weight: 400; font-size: 1.35rem; line-height: 1.2; }
+.mood-tile small { display: block; font-size: .8rem; line-height: 1.3; }
+.mood-tile[aria-pressed="true"] { transform: translateY(2px); box-shadow: 0 2px 0 var(--edge); outline: 4px solid var(--ink); outline-offset: 3px; }
+.mood-tile[aria-pressed="true"]::after, .level[aria-pressed="true"]::after, .pic[aria-pressed="true"]::after, .inst-btn[aria-pressed="true"]::after {
+  content: '✓'; position: absolute; top: -10px; right: -8px; width: 30px; height: 30px; border-radius: 50%;
+  background: var(--ink); color: var(--bg); display: grid; place-items: center; font-size: 1rem; font-family: var(--font-body); font-weight: 700;
+}
+@media (max-width: 440px) {
+  .mood-tile { grid-template-columns: minmax(0, 1fr); justify-items: center; text-align: center; padding: 10px 8px; }
+  .mood-tile .friend { width: 60px; height: 60px; }
+}
+.chips { display: flex; flex-wrap: wrap; gap: 10px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 52px; padding: 6px 16px 6px 8px; border-radius: 999px;
+  border: 2px solid var(--ink); background: var(--surface); color: var(--ink); cursor: pointer; text-align: left;
+  font-family: var(--font-display); font-size: 1.05rem; line-height: 1.25; box-shadow: 0 3px 0 var(--edge);
+}
+.chip .friend { width: 40px; height: 40px; flex: none; }
+.chip.plain { padding-left: 16px; }
+.chip svg.ic { width: 22px; height: 22px; flex: none; }
+.chip[aria-pressed="true"], .chip[aria-pressed="true"] { background: var(--mood); color: var(--on-mood); }
+.chip:active { transform: translateY(3px); box-shadow: none; }
+.levels { display: flex; flex-wrap: wrap; gap: 12px; align-items: stretch; }
+.level {
+  position: relative; flex: 1 1 96px; max-width: 180px; display: grid; justify-items: center; align-content: end; gap: 4px; padding: 10px 8px;
+  border-radius: var(--r-md); border: 2px solid var(--ink); background: var(--surface); color: var(--ink); cursor: pointer;
+  font-family: var(--font-display); font-size: 1.05rem; box-shadow: 0 3px 0 var(--edge);
+}
+.level .friend { width: calc(30px + var(--lv) * 14px); height: calc(30px + var(--lv) * 14px); }
+.level[aria-pressed="true"] { background: var(--mood); color: var(--on-mood); }
+.sentence {
+  margin: 0; font-family: var(--font-display); font-size: 1.45rem; line-height: 1.5; padding: 12px 16px; min-height: 2.6em;
+  background: var(--surface); border: 2px dashed var(--ink-2); border-radius: var(--r-md);
+}
+.sentence b, .mcard b {
+  font-weight: 400; background: var(--mood); color: var(--on-mood); padding: 1px 8px; border-radius: 8px;
+  -webkit-box-decoration-break: clone; box-decoration-break: clone;
+}
+.sentence .blank { color: var(--ink-2); }
+
+/* ───────── methods (tabs) ───────── */
+.methods { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.method {
+  display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 10px; align-items: center; text-align: left; padding: 10px 14px;
+  border-radius: var(--r-md); border: 2px solid var(--ink); background: var(--surface); color: var(--ink); cursor: pointer;
+  box-shadow: 0 3px 0 var(--edge); min-height: 62px;
+}
+.method svg.ic { grid-row: span 2; width: 30px; height: 30px; }
+.method b { font-family: var(--font-display); font-weight: 400; font-size: 1.08rem; line-height: 1.2; }
+.method small { font-size: .78rem; color: var(--ink-2); line-height: 1.25; }
+.method[aria-pressed="true"] { background: var(--mood); color: var(--on-mood); }
+.method[aria-pressed="true"] small { color: var(--on-mood); }
+.method:disabled { opacity: .55; box-shadow: none; cursor: not-allowed; }
+.panel { display: grid; gap: 12px; align-content: start; }
+
+/* ───────── camera ───────── */
+.cam {
+  position: relative; width: 100%; max-width: 560px; aspect-ratio: 4 / 3; max-height: 46vh; margin-inline: auto;
+  background: var(--cam-bg); color: var(--cam-ink); border: 3px solid var(--ink); border-radius: var(--r-lg); overflow: hidden;
+  display: grid; place-items: center;
+}
+.cam video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.cam.mirror video { transform: scaleX(-1); }
+.cam-empty { position: relative; margin: 0; padding: 18px; text-align: center; font-size: .95rem; max-width: 30em; }
+.reticle { position: absolute; inset: 0; margin: auto; width: 36%; aspect-ratio: 1; pointer-events: none; }
+.reticle svg { width: 100%; height: 100%; display: block; transform: rotate(-90deg); overflow: visible; }
+.reticle .r-bg { fill: none; stroke: var(--cam-ink); stroke-width: 5; opacity: .9; }
+.reticle .r-shadow { fill: none; stroke: var(--cam-bg); stroke-width: 9; opacity: .55; }
+.reticle .r-fill { fill: none; stroke: var(--mood); stroke-width: 9; stroke-linecap: round; stroke-dasharray: 289; stroke-dashoffset: calc(289 - 289 * var(--p, 0)); transition: stroke-dashoffset .12s linear; }
+.cam-status {
+  position: absolute; left: 10px; right: 10px; bottom: 10px; display: flex; align-items: center; gap: 10px;
+  background: var(--cam-veil); color: var(--cam-ink); padding: 8px 12px; border-radius: 14px; font-family: var(--font-display); font-size: 1.02rem; line-height: 1.25;
+}
+.swatch { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--cam-ink); flex: none; background: var(--cam-bg); }
+.polaroid {
+  width: min(100%, 300px); background: var(--surface); border: 2px solid var(--ink); border-radius: var(--r-md); padding: 10px 10px 12px;
+  box-shadow: 0 4px 0 var(--edge); transform: rotate(-1.5deg); display: grid; gap: 8px;
+}
+.frame { aspect-ratio: 4 / 3; max-width: 100%; border-radius: 10px; overflow: hidden; border: 4px solid var(--mood); background: var(--mood-soft); }
+.frame img, .frame svg { display: block; width: 100%; height: 100%; object-fit: cover; }
+.polaroid figcaption { font-family: var(--font-display); font-size: .95rem; text-align: center; }
+.pics { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; }
+.pic {
+  position: relative; display: grid; gap: 6px; padding: 8px 8px 10px; border-radius: var(--r-md); border: 2px solid var(--ink); background: var(--surface);
+  color: var(--ink); cursor: pointer; box-shadow: 0 3px 0 var(--edge); font-family: var(--font-display); font-size: .95rem;
+}
+.pic svg { display: block; width: 100%; aspect-ratio: 4 / 3; border-radius: 10px; border: 2px solid var(--ink); }
+.pic[aria-pressed="true"] { background: var(--mood); color: var(--on-mood); }
+.file-btn { position: relative; overflow: hidden; }
+.file-btn input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; font-size: 0; }
+.file-btn:focus-within { outline: 4px solid var(--focus); outline-offset: 3px; }
+
+/* ───────── 3 마음 말 ───────── */
+.mic-box {
+  display: grid; justify-items: center; gap: 10px; padding: 16px; border-radius: var(--r-lg); border: 2px solid var(--ink); background: var(--surface);
+}
+.mic-btn {
+  width: 108px; height: 108px; border-radius: 50%; border: 3px solid var(--ink); background: var(--mood); color: var(--on-mood);
+  display: grid; place-items: center; cursor: pointer; box-shadow: 0 4px 0 var(--edge);
+}
+.mic-btn svg { width: 46px; height: 46px; }
+.mic-btn[aria-pressed="true"] { background: var(--ink); color: var(--bg); animation: pulse 1.1s ease-in-out infinite; }
+@keyframes pulse { 50% { transform: scale(1.06); } }
+.mic-state { margin: 0; font-family: var(--font-display); font-size: 1.08rem; text-align: center; min-height: 1.5em; }
+.live { margin: 0; min-height: 1.5em; color: var(--ink-2); text-align: center; }
+.timebar { width: min(100%, 320px); height: 14px; border-radius: 8px; border: 2px solid var(--ink); background: var(--surface-2); overflow: hidden; }
+.timebar i { display: block; height: 100%; width: calc(var(--v, 0) * 100%); background: var(--mood-mark); }
+.because { display: grid; gap: 6px; }
+.because label { font-family: var(--font-display); font-size: 1.15rem; }
+
+/* ───────── 4 마음 소리 ───────── */
+.inst-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.inst-btn {
+  position: relative; display: grid; justify-items: center; gap: 2px; padding: 6px 4px 8px; border-radius: var(--r-md); border: 2px solid var(--ink);
+  background: var(--surface); color: var(--ink); cursor: pointer; box-shadow: 0 3px 0 var(--edge); font-family: var(--font-display); font-size: .95rem; line-height: 1.2; min-width: 0;
+}
+.inst-btn svg { width: min(100%, 58px); height: auto; }
+.inst-btn[aria-pressed="true"] { background: var(--mood); color: var(--on-mood); }
+.pad {
+  position: relative; height: min(34vh, 320px); min-height: 200px; border-radius: var(--r-lg); border: 3px solid var(--ink); background: var(--mood-soft);
+  display: grid; place-items: center; overflow: hidden; touch-action: none; cursor: pointer; user-select: none; -webkit-user-select: none; padding: 0; width: 100%; color: var(--ink);
+}
+.pad .inst { width: auto; height: 100%; max-width: 80%; pointer-events: none; }
+.pad.hit .inst { animation: thump .2s ease-out; }
+@keyframes thump { 30% { transform: scale(1.07) rotate(-1.5deg); } }
+.pad-tip {
+  position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%); width: max-content; max-width: calc(100% - 24px); text-align: center;
+  font-family: var(--font-display); font-size: .92rem; line-height: 1.3; pointer-events: none; padding: 3px 14px; border-radius: 999px;
+  background: var(--surface); border: 2px solid var(--ink);
+}
+.ripple { position: absolute; width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 50%; border: 4px solid var(--ink); pointer-events: none; animation: ripple .75s ease-out forwards; }
+@keyframes ripple { from { opacity: .8; } to { transform: scale(calc(2.5 + var(--s, .5) * 5)); opacity: 0; } }
+.boom { position: absolute; font-family: var(--font-display); font-size: 1.5rem; pointer-events: none; animation: rise .9s ease-out forwards; white-space: nowrap; }
+@keyframes rise { to { transform: translateY(-46px); opacity: 0; } }
+.pad-cam { position: absolute; right: 10px; top: 10px; width: 132px; aspect-ratio: 4 / 3; border-radius: 12px; border: 2px solid var(--ink); overflow: hidden; background: var(--cam-bg); pointer-events: none; }
+.pad-cam video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); display: block; }
+.level-bar { position: absolute; left: 10px; top: 10px; width: 132px; height: 14px; border-radius: 8px; border: 2px solid var(--ink); background: var(--surface); overflow: hidden; pointer-events: none; }
+.level-bar i { display: block; height: 100%; width: calc(var(--v, 0) * 100%); background: var(--ink); }
+.rec-bar { position: absolute; left: 0; right: 0; top: 0; height: 10px; background: transparent; pointer-events: none; }
+.rec-bar i { display: block; height: 100%; width: calc(var(--v, 0) * 100%); background: var(--mood-mark); border-bottom: 2px solid var(--ink); }
+.i-wood { fill: var(--wood); } .i-metal { fill: var(--metal); } .i-copper { fill: var(--copper); } .i-skin { fill: var(--skin); }
+.i-line { stroke: var(--ink); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.i-edge { stroke: var(--ink); }
+.i-dark { fill: #1B1A33; }
+.inst-btn[aria-pressed="true"] svg { --ink: var(--on-mood); }
+
+/* ───────── 5 숨 고르기 ───────── */
+.breath { position: relative; display: grid; place-items: center; height: min(38vh, 300px); min-height: 230px; border-radius: var(--r-lg); border: 2px solid var(--ink); background: var(--surface); overflow: hidden; }
+.breath-circle {
+  width: 104px; height: 104px; border-radius: 50%; background: var(--mood); border: 3px solid var(--ink);
+  transition: transform 4s ease-in-out; display: grid; place-items: center;
+}
+.breath-circle .friend { width: 70%; height: 70%; }
+.breath-circle.in { transform: scale(1.85); }
+.breath-label { position: absolute; left: 16px; right: 108px; top: 12px; margin: 0; font-family: var(--font-display); font-size: 1.3rem; line-height: 1.3; }
+.breath-dots { position: absolute; left: 0; right: 0; bottom: 10px; display: flex; justify-content: center; gap: 8px; }
+.breath-dots i { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--ink); background: var(--surface); }
+.breath-dots i.on { background: var(--mood); }
+.pinwheel { position: absolute; right: 14px; top: 12px; width: 84px; height: 110px; }
+.pinwheel .blades { transform-origin: 42px 42px; transform: rotate(var(--rot, 0deg)); }
+
+/* ───────── card ───────── */
+.mcard {
+  --mood: var(--line); --mood-soft: var(--surface-2);
+  background: var(--mood-soft); color: var(--ink); border: 3px solid var(--ink); border-radius: var(--r-lg); padding: 14px;
+  display: grid; gap: 10px; box-shadow: 0 5px 0 var(--edge); min-width: 0;
+}
+.mcard-top { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: center; }
+.mcard-friend { width: 78px; height: 78px; border-radius: 50%; background: var(--surface); border: 2px solid var(--ink); display: grid; place-items: center; }
+.mcard-friend .friend { width: 78%; height: 78%; }
+.mcard-name { margin: 0; font-size: .82rem; color: var(--ink-2); }
+.mcard-say { margin: 0; font-family: var(--font-display); font-size: 1.3rem; line-height: 1.45; }
+.mcard-photo { margin: 0; aspect-ratio: 4 / 3; max-width: 100%; border-radius: var(--r-md); overflow: hidden; border: 2px solid var(--ink); background: var(--surface); }
+.mcard-photo img, .mcard-photo svg { display: block; width: 100%; height: 100%; object-fit: cover; }
+.mcard-because { margin: 0; font-size: 1.02rem; line-height: 1.6; overflow-wrap: anywhere; }
+.mcard-media { display: flex; flex-wrap: wrap; gap: 8px; }
+.mcard-helper { margin: 0; font-size: .92rem; padding: 8px 12px; border-radius: 12px; background: var(--surface); border: 2px dashed var(--ink-2); }
+.mcard-foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; font-size: .8rem; color: var(--ink-2); }
+.slot { margin: 0; border: 2px dashed var(--ink-2); border-radius: var(--r-sm); padding: 8px 10px; color: var(--ink-2); font-size: .82rem; text-align: center; }
+.stickers { display: flex; flex-wrap: wrap; gap: 6px; }
+.stk {
+  display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px 2px 6px; border-radius: 999px; border: 2px solid var(--ink);
+  background: var(--surface); color: var(--ink); font-family: var(--font-display); font-size: .85rem;
+}
+.stk svg { width: 20px; height: 20px; }
+.stk em { font-style: normal; font-variant-numeric: tabular-nums; }
+.card-layout { display: grid; gap: 18px; grid-template-columns: minmax(0, 1fr); align-items: start; }
+@media (min-width: 760px) { .card-layout { grid-template-columns: minmax(0, 340px) minmax(0, 1fr); } }
+.card-side { display: grid; gap: 14px; align-content: start; }
+.cheer { display: grid; gap: 8px; }
+.pop { animation: pop .35s ease-out; }
+@keyframes pop { 40% { transform: scale(1.18) rotate(-3deg); } }
+
+/* ───────── wall ───────── */
+.weather { display: grid; gap: 10px; padding: 14px 16px; border-radius: var(--r-lg); border: 2px solid var(--ink); background: var(--surface); }
+.weather h3 { margin: 0; }
+.w-rows { display: grid; gap: 8px; }
+.w-row { display: grid; grid-template-columns: 34px 5.2em minmax(0, 1fr) 3.2em; gap: 10px; align-items: center; position: relative; }
+.w-row .friend { width: 34px; height: 34px; }
+.w-name { font-family: var(--font-display); font-size: .95rem; }
+.w-track { height: 18px; border-radius: 4px; background: var(--surface-2); position: relative; }
+.w-bar { position: absolute; left: 0; top: 0; bottom: 0; width: calc(var(--v, 0) * 100%); min-width: 0; border-radius: 0 4px 4px 0; background: var(--mk); }
+.w-count { text-align: right; font-variant-numeric: tabular-nums; font-size: .95rem; }
+.w-tip {
+  position: absolute; left: 50%; bottom: calc(100% + 4px); transform: translateX(-50%); z-index: 3; white-space: nowrap; pointer-events: none;
+  background: var(--ink); color: var(--bg); padding: 4px 10px; border-radius: 8px; font-size: .82rem; display: none;
+}
+.w-row:hover .w-tip, .w-row:focus-within .w-tip { display: block; }
+.wall { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
+.mini {
+  --mood: var(--line); --mood-soft: var(--surface-2); position: relative;
+  display: grid; gap: 6px; padding: 10px; border-radius: var(--r-md); border: 2px solid var(--ink); background: var(--mood-soft); color: var(--ink);
+  cursor: pointer; text-align: left; box-shadow: 0 3px 0 var(--edge); min-width: 0;
+}
+.mini-top { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 8px; align-items: center; }
+.mini-top .friend { width: 44px; height: 44px; }
+.mini-word { font-family: var(--font-display); font-size: 1.02rem; line-height: 1.2; }
+.mini-name { font-size: .78rem; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mini-thumb { aspect-ratio: 4 / 3; max-width: 100%; border-radius: 10px; overflow: hidden; border: 2px solid var(--ink); background: var(--surface); }
+.mini-thumb img, .mini-thumb svg { display: block; width: 100%; height: 100%; object-fit: cover; }
+.mini .tag { position: absolute; top: -13px; right: 8px; }
+.empty { margin: 0; padding: 18px; border-radius: var(--r-md); border: 2px dashed var(--ink-2); color: var(--ink-2); text-align: center; }
+
+/* ───────── dialogs, toast ───────── */
+dialog {
+  border: 3px solid var(--ink); border-radius: var(--r-lg); background: var(--surface); color: var(--ink); padding: 18px;
+  width: min(580px, calc(100% - 32px)); max-height: calc(100% - 32px); box-shadow: 0 8px 0 var(--edge); overflow-y: auto;
+}
+dialog::backdrop { background: var(--veil); }
+dialog h2 { font-family: var(--font-display); font-weight: 400; font-size: 1.45rem; margin: 0; }
+.dlg-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.dlg-body { display: grid; gap: 14px; }
+.set { display: grid; gap: 8px; border: 0; padding: 0; margin: 0; min-width: 0; }
+.set legend, .set > label.t { font-family: var(--font-display); font-size: 1.05rem; padding: 0; margin-bottom: 4px; }
+.seg { display: flex; flex-wrap: wrap; gap: 8px; }
+.seg label { position: relative; cursor: pointer; }
+.seg input { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+.seg span { display: inline-flex; align-items: center; min-height: 46px; padding: 6px 16px; border-radius: 999px; border: 2px solid var(--ink); background: var(--surface); font-family: var(--font-display); font-size: .98rem; }
+.seg input:checked + span { background: var(--ink); color: var(--bg); }
+.seg input:focus-visible + span { outline: 4px solid var(--focus); outline-offset: 3px; }
+.switch { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px; cursor: pointer; }
+.switch span { display: grid; }
+.switch small { color: var(--ink-2); font-size: .8rem; }
+.switch input { appearance: none; -webkit-appearance: none; flex: none; width: 58px; height: 34px; border-radius: 999px; border: 2px solid var(--ink); background: var(--surface-2); position: relative; cursor: pointer; margin: 0; }
+.switch input::after { content: ''; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 50%; background: var(--ink); transition: transform .15s; }
+.switch input:checked { background: var(--accent); }
+.switch input:checked::after { transform: translateX(24px); background: var(--accent-ink); }
+.teacher { border-top: 2px dashed var(--line); padding-top: 12px; display: grid; gap: 8px; }
+.teacher summary { font-family: var(--font-display); font-size: 1.05rem; cursor: pointer; }
+.teacher ul { margin: 0; padding-left: 1.2em; font-size: .9rem; color: var(--ink-2); display: grid; gap: 4px; }
+.confirm { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 12px; border-radius: var(--r-sm); border: 2px solid var(--ink); background: var(--surface-2); }
+.confirm p { margin: 0; flex: 1 1 200px; font-size: .95rem; }
+.toast {
+  position: fixed; left: 50%; bottom: calc(86px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 20;
+  max-width: calc(100% - 32px); padding: 10px 18px; border-radius: 999px; border: 2px solid var(--ink); background: var(--surface); color: var(--ink);
+  font-family: var(--font-display); font-size: 1rem; box-shadow: 0 4px 0 var(--edge); text-align: center;
+}
+.burst { position: fixed; left: 50%; top: 42%; width: 0; height: 0; z-index: 30; pointer-events: none; }
+.burst i { position: absolute; width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--edge); animation: fly .9s ease-out forwards; }
+@keyframes fly { to { transform: translate(var(--dx), var(--dy)) scale(.4); opacity: 0; } }
+
+@media (max-width: 640px) {
+  .top { gap: 6px; padding-block: 8px; }
+  .steps { order: 3; flex-basis: 100%; }
+  .ask h2 { font-size: 1.4rem; }
+  .sentence { font-size: 1.2rem; }
+  .inst-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .nav .btn { min-width: 84px; padding-inline: 14px; }
+  .pad-cam, .level-bar { width: 96px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bob, .mic-btn[aria-pressed="true"], .pop, .pad.hit .inst { animation: none; }
+  .ripple, .boom, .burst i { animation-duration: .01s; }
+  .btn, .mood-tile { transition: none; }
+}
+:root[data-motion="less"] .bob, :root[data-motion="less"] .mic-btn[aria-pressed="true"],
+:root[data-motion="less"] .pop, :root[data-motion="less"] .pad.hit .inst { animation: none; }
+:root[data-motion="less"] .ripple, :root[data-motion="less"] .boom, :root[data-motion="less"] .burst i { animation-duration: .01s; }
+
+/* small fixes */
+#dlgCardBody .mcard { max-width: 440px; margin-inline: auto; }
+#padInst { position: absolute; inset: 16px 0 48px; display: grid; place-items: center; pointer-events: none; }
+.mini-top > span { display: grid; min-width: 0; }
+.mini-word, .mini-name, .mini-thumb { display: block; }
+.ask h2:focus, .hero h1:focus { outline: none; }
+.breath-circle { background: none; border: 0; width: 112px; height: 112px; }
+.breath-circle .friend { width: 100%; height: 100%; }
+
+/* mood theming: any element carrying data-mood (app shell, cards, dialogs) */
+[data-mood="yellow"] { --mood: var(--yellow); --mood-soft: var(--yellow-soft); --mood-mark: var(--m-yellow); }
+[data-mood="green"]  { --mood: var(--green);  --mood-soft: var(--green-soft);  --mood-mark: var(--m-green); }
+[data-mood="blue"]   { --mood: var(--blue);   --mood-soft: var(--blue-soft);   --mood-mark: var(--m-blue); }
+[data-mood="red"]    { --mood: var(--red);    --mood-soft: var(--red-soft);    --mood-mark: var(--m-red); }
+</style>
+</head>
+<body>
+<div class="app" id="app" data-screen="home" data-guide="off" data-captions="on">
+  <header class="top">
+    <button class="brand" id="btnHome" type="button" aria-label="마음 팔레트, 처음 화면으로">
+      <span id="brandMark"></span><span>마음 팔레트</span>
+    </button>
+    <ol class="steps" id="steps" aria-label="활동 순서"></ol>
+    <div class="top-actions">
+      <button class="btn sm" id="btnWall" type="button">우리 반</button>
+      <button class="btn sm" id="btnSet" type="button">보기 설정</button>
+    </div>
+  </header>
+
+  <main class="stage">
+    <div class="stage-main" id="stageMain">
+
+      <!-- 처음 -->
+      <section class="screen" id="scr-home" aria-labelledby="h-home">
+        <div class="hero">
+          <div class="hero-art" id="heroArt"></div>
+          <div class="hero-copy">
+            <h1 id="h-home">오늘 내 마음은 무슨 색일까요?</h1>
+            <p class="lead">색을 고르고, 사진과 목소리와 악기 소리로 내 마음을 담아 친구들과 나눠요.</p>
+          </div>
+        </div>
+        <div class="field">
+          <label for="inName">이름이나 별명<span class="opt">안 써도 돼요</span></label>
+          <input id="inName" type="text" maxlength="10" autocomplete="off" placeholder="예: 하늘이">
+        </div>
+        <fieldset class="modes">
+          <legend>어떻게 할까요?</legend>
+          <div class="mode-grid">
+            <label class="mode"><input type="radio" name="mode" value="free" id="modeFree"><span class="mode-body"><b>자유 모드</b><span>내 마음대로 골라서 해요</span></span></label>
+            <label class="mode"><input type="radio" name="mode" value="guide" id="modeGuide"><span class="mode-body"><b>가이드 모드</b><span>한 단계씩, 도움말과 함께해요</span></span></label>
+            <label class="mode"><input type="radio" name="mode" value="listen" id="modeListen"><span class="mode-body"><b>듣기 모드</b><span>화면을 소리로 읽어 줘요</span></span></label>
+          </div>
+        </fieldset>
+        <div class="row">
+          <button class="btn primary xl" id="btnStart" type="button">시작하기</button>
+          <button class="btn" id="btnHomeWall" type="button">우리 반 팔레트 보기</button>
+        </div>
+        <p class="note">사진과 목소리는 이 기기 안에서만 쓰여요. 어디에도 보내지 않아요.</p>
+      </section>
+
+      <!-- 1 마음 색 -->
+      <section class="screen" id="scr-mood" aria-labelledby="h-mood" hidden>
+        <div class="ask">
+          <h2 id="h-mood">지금 내 마음은 어떤 색에 가까워요?</h2>
+          <button class="say" type="button" data-say="mood" aria-label="안내 듣기"></button>
+        </div>
+        <p class="hint" id="hint-mood">몸이 보내는 신호를 떠올려 봐요. 심장이 빨리 뛰나요? 몸이 축 처지나요?</p>
+        <div class="meter-wrap">
+          <div class="axis" aria-hidden="true"><span>← 마음이 불편해요</span><span>마음이 좋아요 →</span></div>
+          <div class="meter-body">
+            <div class="axis-v" aria-hidden="true"><span>기운이 많아요</span><span>기운이 적어요</span></div>
+            <div class="meter" id="meter" role="group" aria-labelledby="h-mood"></div>
+          </div>
+        </div>
+        <div id="moodMore" hidden>
+          <div class="screen">
+            <div id="wordBox">
+              <h3 id="h-word">어떤 마음인지 낱말을 골라요</h3>
+              <div class="chips" id="wordChips" role="group" aria-labelledby="h-word"></div>
+            </div>
+            <div>
+              <h3 id="h-level">얼마나 그런가요?</h3>
+              <div class="levels" id="levelChips" role="group" aria-labelledby="h-level"></div>
+            </div>
+          </div>
+        </div>
+        <p class="sentence" id="moodSentence" aria-live="polite"></p>
+      </section>
+
+      <!-- 2 마음 장면 -->
+      <section class="screen" id="scr-photo" aria-labelledby="h-photo" hidden>
+        <div class="ask">
+          <h2 id="h-photo">내 마음을 보여 주는 장면을 담아요</h2>
+          <button class="say" type="button" data-say="photo" aria-label="안내 듣기"></button>
+        </div>
+        <p class="hint" id="hint-photo">얼굴이 아니어도 좋아요. 내 마음 색을 닮은 물건을 교실에서 찾아봐요.</p>
+        <div class="methods" id="photoMethods" role="group" aria-label="장면을 담는 방법">
+          <button class="method" type="button" id="tab-hunt" data-method="hunt" aria-pressed="false"><i data-ic="hunt"></i><b>색 찾기 탐험</b><small>카메라로 내 마음 색 찾기</small></button>
+          <button class="method" type="button" id="tab-shot" data-method="shot" aria-pressed="false"><i data-ic="cam"></i><b>사진 찍기</b><small>찍거나 사진 올리기</small></button>
+          <button class="method" type="button" id="tab-pic" data-method="pic" aria-pressed="false"><i data-ic="pic"></i><b>그림 고르기</b><small>마음 날씨 그림 고르기</small></button>
+        </div>
+        <p class="note warn" id="photoNote" hidden></p>
+
+        <div class="panel" id="p-hunt" hidden>
+          <div class="cam" id="huntCam">
+            <video id="huntVideo" playsinline muted></video>
+            <p class="cam-empty" id="huntEmpty">탐험을 시작하면 카메라가 켜져요. 내 마음 색과 같은 색을 찾아 동그라미 안에 담아요.</p>
+            <div class="reticle" id="huntReticle" hidden><svg viewBox="0 0 100 100" aria-hidden="true"><circle class="r-shadow" cx="50" cy="50" r="46"/><circle class="r-bg" cx="50" cy="50" r="46"/><circle class="r-fill" cx="50" cy="50" r="46"/></svg></div>
+            <div class="cam-status" id="huntStatus" hidden><span class="swatch" id="huntSwatch"></span><span id="huntText" aria-live="polite"></span></div>
+          </div>
+          <div class="row">
+            <button class="btn mood" type="button" id="btnHunt">탐험 시작</button>
+            <button class="btn" type="button" id="btnHuntSnap" hidden>지금 찍기</button>
+          </div>
+        </div>
+
+        <div class="panel" id="p-shot" hidden>
+          <div class="cam" id="shotCam">
+            <video id="shotVideo" playsinline muted></video>
+            <p class="cam-empty" id="shotEmpty">카메라를 켜서 찍거나, 가지고 있는 사진을 올려요.</p>
+          </div>
+          <div class="row">
+            <button class="btn mood" type="button" id="btnShotOn">카메라 켜기</button>
+            <button class="btn mood" type="button" id="btnShot" hidden>찰칵</button>
+            <button class="btn" type="button" id="btnFlip" hidden>카메라 바꾸기</button>
+            <label class="btn file-btn"><span>사진 올리기</span><input type="file" accept="image/*" id="inFile" aria-label="사진 올리기"></label>
+          </div>
+        </div>
+
+        <div class="panel" id="p-pic" hidden>
+          <div class="pics" id="pics" role="group" aria-label="마음 날씨 그림"></div>
+        </div>
+
+        <div class="panel" id="photoResult" hidden>
+          <figure class="polaroid" style="margin:0"><div class="frame" id="photoFrame"></div><figcaption id="photoCap"></figcaption></figure>
+          <div class="row"><button class="btn sm" id="btnPhotoClear" type="button">다시 담기</button></div>
+        </div>
+        <p class="note">사진은 이 기기 안에서만 쓰여요.</p>
+      </section>
+
+      <!-- 3 마음 말 -->
+      <section class="screen" id="scr-voice" aria-labelledby="h-voice" hidden>
+        <div class="ask">
+          <h2 id="h-voice">왜 그런 마음이 들었나요?</h2>
+          <button class="say" type="button" data-say="voice" aria-label="안내 듣기"></button>
+        </div>
+        <p class="hint" id="hint-voice">“왜냐하면…” 하고 이어서 말해 봐요. 말하고 싶지 않으면 건너뛰어도 괜찮아요.</p>
+        <div class="methods" id="voiceMethods" role="group" aria-label="말하는 방법">
+          <button class="method" type="button" id="tab-stt" data-method="stt" aria-pressed="false"><i data-ic="mic"></i><b>말하기</b><small>말하면 글자로 바뀌어요</small></button>
+          <button class="method" type="button" id="tab-rec" data-method="rec" aria-pressed="false"><i data-ic="rec"></i><b>목소리 담기</b><small>내 목소리 그대로 담기</small></button>
+          <button class="method" type="button" id="tab-pick" data-method="pick" aria-pressed="false"><i data-ic="list"></i><b>문장 고르기</b><small>비슷한 까닭 고르기</small></button>
+        </div>
+        <p class="note warn" id="voiceNote" hidden></p>
+
+        <div class="panel" id="p-stt" hidden>
+          <div class="mic-box">
+            <button class="mic-btn" id="btnStt" type="button" aria-pressed="false" aria-label="말하기 시작"></button>
+            <p class="mic-state" id="sttState">단추를 누르고 말해요</p>
+            <p class="live" id="sttLive" aria-live="polite"></p>
+          </div>
+        </div>
+        <div class="panel" id="p-rec" hidden>
+          <div class="mic-box">
+            <button class="mic-btn" id="btnRec" type="button" aria-pressed="false" aria-label="목소리 담기 시작"></button>
+            <p class="mic-state" id="recState">단추를 누르면 10초까지 담아요</p>
+            <div class="timebar" id="recBar" aria-hidden="true"><i></i></div>
+            <div class="row">
+              <button class="btn sm" id="btnRecPlay" type="button" hidden>내 목소리 듣기</button>
+              <button class="btn sm" id="btnRecDel" type="button" hidden>지우기</button>
+            </div>
+          </div>
+        </div>
+        <div class="panel" id="p-pick" hidden>
+          <div class="chips" id="becauseChips" role="group" aria-label="까닭 문장"></div>
+        </div>
+        <div class="because">
+          <label for="inBecause">왜냐하면…</label>
+          <textarea id="inBecause" maxlength="60" placeholder="여기에 직접 써도 돼요"></textarea>
+        </div>
+      </section>
+
+      <!-- 4 마음 소리 -->
+      <section class="screen" id="scr-music" aria-labelledby="h-music" hidden>
+        <div class="ask">
+          <h2 id="h-music">내 마음을 소리로 연주해요</h2>
+          <button class="say" type="button" data-say="music" aria-label="안내 듣기"></button>
+        </div>
+        <p class="hint" id="hint-music">악기를 고르고, 내 마음처럼 세게 또는 살살 연주해요. 소리는 화면의 물결로도 보여요.</p>
+        <div class="inst-row" id="instRow" role="group" aria-label="악기"></div>
+        <div class="methods" id="howRow" role="group" aria-label="연주 방법">
+          <button class="method" type="button" id="how-touch" data-method="touch" aria-pressed="true"><i data-ic="touch"></i><b>화면 누르기</b><small>누르거나 문지르기</small></button>
+          <button class="method" type="button" id="how-shake" data-method="shake" aria-pressed="false"><i data-ic="shake"></i><b>기기 흔들기</b><small>태블릿을 흔들어요</small></button>
+          <button class="method" type="button" id="how-body" data-method="body" aria-pressed="false"><i data-ic="body"></i><b>몸 움직이기</b><small>카메라 앞에서 움직여요</small></button>
+        </div>
+        <p class="note warn" id="musicNote" hidden></p>
+        <div class="pad" id="pad" role="button" tabindex="0" aria-label="악기 연주하기. 누르면 소리가 나요.">
+          <span class="rec-bar" id="perfBar"><i></i></span>
+          <span id="padInst"></span>
+          <span class="pad-cam" id="padCam" hidden><video id="bodyVideo" playsinline muted></video></span>
+          <span class="level-bar" id="padLevel" hidden><i></i></span>
+          <span class="pad-tip" id="padTip">여기를 눌러 연주해요</span>
+        </div>
+        <div class="row">
+          <button class="btn" id="btnBgm" type="button" aria-pressed="false">감정 음악 켜기</button>
+          <button class="btn mood" id="btnPerf" type="button">연주 담기 (10초)</button>
+          <button class="btn" id="btnPerfPlay" type="button" hidden>내 연주 듣기</button>
+        </div>
+      </section>
+
+      <!-- 5 숨 고르기 -->
+      <section class="screen" id="scr-calm" aria-labelledby="h-calm" hidden>
+        <div class="ask">
+          <h2 id="h-calm">천천히 숨을 골라요</h2>
+          <button class="say" type="button" data-say="calm" aria-label="안내 듣기"></button>
+        </div>
+        <p class="hint" id="hint-calm">꽃향기를 맡듯이 코로 들이쉬고, 촛불을 끄듯이 입으로 후— 내쉬어요.</p>
+        <div class="breath" id="breath">
+          <div class="breath-circle" id="breathCircle"></div>
+          <svg class="pinwheel" id="pinwheel" viewBox="0 0 84 110" aria-hidden="true" focusable="false">
+            <path d="M42 42V106" stroke="#1B1A33" stroke-width="4" stroke-linecap="round" style="stroke:var(--ink)"/>
+            <g class="blades">
+              <path d="M42 42V6c18 4 22 22 0 36z" fill="#FFC533" stroke="#1B1A33" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M42 42h36c-4 18-22 22-36 0z" fill="#F2665E" stroke="#1B1A33" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M42 42v36c-18-4-22-22 0-36z" fill="#5AA2F7" stroke="#1B1A33" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M42 42H6c4-18 22-22 36 0z" fill="#4CC38A" stroke="#1B1A33" stroke-width="2" stroke-linejoin="round"/>
+              <circle cx="42" cy="42" r="5" fill="#FFFFFF" stroke="#1B1A33" stroke-width="2"/>
+            </g>
+          </svg>
+          <p class="breath-label" id="breathLabel" aria-live="polite">세 번만 함께 숨 쉬어요</p>
+          <div class="breath-dots" id="breathDots" aria-hidden="true"><i></i><i></i><i></i></div>
+        </div>
+        <div class="row">
+          <button class="btn mood" id="btnBreath" type="button">숨쉬기 시작</button>
+          <button class="btn" id="btnBlow" type="button" aria-pressed="false">후— 불어서 바람개비 돌리기</button>
+        </div>
+        <p class="note warn" id="calmNote" hidden></p>
+        <h3 id="h-helper">지금 나를 돕는 방법을 하나 골라요</h3>
+        <div class="chips" id="helperChips" role="group" aria-labelledby="h-helper"></div>
+      </section>
+
+      <!-- 6 마음 카드 -->
+      <section class="screen" id="scr-card" aria-labelledby="h-card" hidden>
+        <div class="ask">
+          <h2 id="h-card">내 마음 카드가 완성됐어요</h2>
+          <button class="say" type="button" data-say="card" aria-label="안내 듣기"></button>
+        </div>
+        <p class="hint" id="hint-card">카드를 친구에게 보여 주고, 친구의 카드에는 응원 스티커를 붙여 줘요.</p>
+        <div class="card-layout">
+          <div id="bigCard"></div>
+          <div class="card-side">
+            <div class="row">
+              <button class="btn mood" id="btnRead" type="button">카드 읽어 주기</button>
+              <button class="btn" id="btnShow" type="button">크게 보여 주기</button>
+            </div>
+            <div class="cheer">
+              <h3 id="h-cheer">친구가 응원 스티커를 붙여 줘요</h3>
+              <div class="chips" id="cheerChips" role="group" aria-labelledby="h-cheer"></div>
+            </div>
+            <div class="row">
+              <button class="btn primary" id="btnPost" type="button">우리 반 팔레트에 붙이기</button>
+              <button class="btn" id="btnSave" type="button">그림으로 저장</button>
+              <button class="btn ghost" id="btnNew" type="button">새 카드 만들기</button>
+            </div>
+            <div id="newConfirm"></div>
+            <p class="note" id="postNote">붙인 카드는 이 기기의 ‘우리 반’에 모여요.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 우리 반 팔레트 -->
+      <section class="screen" id="scr-wall" aria-labelledby="h-wall" hidden>
+        <div class="ask">
+          <h2 id="h-wall">우리 반 팔레트</h2>
+          <button class="say" type="button" data-say="wall" aria-label="안내 듣기"></button>
+        </div>
+        <div class="weather" id="weather"></div>
+        <div class="wall" id="wallGrid"></div>
+        <div class="row"><button class="btn primary" id="btnWallNew" type="button">내 카드 만들기</button></div>
+        <p class="note">카드는 이 기기에만 모여요. 수업이 끝나면 보기 설정의 ‘선생님 안내’에서 비울 수 있어요.</p>
+      </section>
+
+    </div>
+
+    <aside class="rail" aria-label="마음 카드 미리 보기">
+      <p class="rail-label"><span id="railTitle">마음 카드</span><span class="tag" id="railTag">예시</span></p>
+      <div id="railCard"></div>
+    </aside>
+  </main>
+
+  <footer class="nav">
+    <button class="btn" id="btnPrev" type="button" hidden>이전</button>
+    <div class="caption" id="caption" role="status" aria-live="polite"></div>
+    <button class="btn primary" id="btnNext" type="button" hidden>다음</button>
+  </footer>
+</div>
+
+<div class="toast" id="toast" role="alert" hidden></div>
+
+<dialog id="dlgSet" aria-labelledby="h-set">
+  <div class="dlg-head"><h2 id="h-set">보기 설정</h2><button class="btn sm" type="button" data-close>닫기</button></div>
+  <div class="dlg-body">
+    <fieldset class="set"><legend>참여 방법</legend>
+      <div class="seg">
+        <label><input type="radio" name="setMode" value="free" id="setModeFree"><span>자유 모드</span></label>
+        <label><input type="radio" name="setMode" value="guide" id="setModeGuide"><span>가이드 모드</span></label>
+        <label><input type="radio" name="setMode" value="listen" id="setModeListen"><span>듣기 모드</span></label>
+      </div>
+    </fieldset>
+    <fieldset class="set"><legend>글자 크기</legend>
+      <div class="seg">
+        <label><input type="radio" name="setText" value="normal" id="setTextNormal"><span>보통</span></label>
+        <label><input type="radio" name="setText" value="big" id="setTextBig"><span>크게</span></label>
+        <label><input type="radio" name="setText" value="huge" id="setTextHuge"><span>아주 크게</span></label>
+      </div>
+    </fieldset>
+    <fieldset class="set"><legend>감정 낱말 수</legend>
+      <div class="seg">
+        <label><input type="radio" name="setWords" value="4" id="setWords4"><span>4개 · 쉬움</span></label>
+        <label><input type="radio" name="setWords" value="8" id="setWords8"><span>8개</span></label>
+        <label><input type="radio" name="setWords" value="16" id="setWords16"><span>16개 · 풍부하게</span></label>
+      </div>
+    </fieldset>
+    <label class="switch" for="swContrast"><span>고대비 화면<small>검은 바탕에 밝은 글자로 또렷하게</small></span><input type="checkbox" id="swContrast"></label>
+    <label class="switch" for="swTts"><span>화면 읽어 주기<small>안내와 단추 이름을 소리로 들려줘요</small></span><input type="checkbox" id="swTts"></label>
+    <label class="switch" for="swCap"><span>소리 자막<small>소리와 안내를 글자로 보여 줘요</small></span><input type="checkbox" id="swCap"></label>
+    <label class="switch" for="swSound"><span>소리 켜기<small>악기와 음악, 효과음</small></span><input type="checkbox" id="swSound"></label>
+    <label class="switch" for="swMotion"><span>움직임 줄이기<small>흔들리고 튀는 효과를 꺼요</small></span><input type="checkbox" id="swMotion"></label>
+    <details class="teacher">
+      <summary>선생님 안내</summary>
+      <ul>
+        <li>사진·목소리·카드는 이 기기의 브라우저 안에만 있고 어디에도 전송하지 않아요. 목소리는 화면을 닫으면 사라져요.</li>
+        <li>카메라·마이크·흔들기는 https 주소로 연 화면에서 권한을 허용해야 켜져요. 꺼져 있어도 사진 올리기·문장 고르기·화면 누르기로 모든 활동을 할 수 있어요.</li>
+        <li>‘말하기’의 글자 변환은 브라우저가 처리해요. 브라우저에 따라 인터넷으로 보내 처리할 수 있으니 이름 같은 개인정보는 말하지 않게 안내해 주세요.</li>
+        <li>노랑·초록·파랑·빨강 색종이를 교실 곳곳에 붙여 두면 ‘색 찾기 탐험’이 감정 찾기 놀이가 돼요.</li>
+      </ul>
+      <div class="row"><button class="btn sm" id="btnClearWall" type="button">우리 반 팔레트 비우기</button></div>
+      <div id="clearConfirm"></div>
+    </details>
+  </div>
+</dialog>
+
+<dialog id="dlgCard" aria-labelledby="h-dlgcard">
+  <div class="dlg-head"><h2 id="h-dlgcard">마음 카드</h2><button class="btn sm" type="button" data-close>닫기</button></div>
+  <div class="dlg-body">
+    <div id="dlgCardBody"></div>
+    <div class="row"><button class="btn mood" id="btnDlgRead" type="button">카드 읽어 주기</button></div>
+    <div class="cheer">
+      <h3 id="h-dlgcheer">응원 스티커를 붙여 줘요</h3>
+      <div class="chips" id="dlgCheer" role="group" aria-labelledby="h-dlgcheer"></div>
+    </div>
+    <div class="row"><button class="btn sm ghost" id="btnDlgRemove" type="button">이 카드 떼기</button></div>
+    <div id="dlgConfirm"></div>
+  </div>
+</dialog>
+<script>
+(() => {
+'use strict';
+/* ───────── 기본 도구 ───────── */
+const D = document;
+D.documentElement.lang = 'ko';
+const $ = (s, r = D) => r.querySelector(s);
+const $$ = (s, r = D) => Array.from(r.querySelectorAll(s));
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const INK = '#1B1A33';
+const HEX = { yellow: '#FFC533', green: '#4CC38A', blue: '#5AA2F7', red: '#F2665E' };
+const SOFT = { yellow: '#FFF1C4', green: '#D9F4E6', blue: '#DAE9FF', red: '#FFE0DC' };
+const KEY = 'maeum-palette-v1';
+const mem = {
+  load() { try { return JSON.parse(localStorage.getItem(KEY) || 'null') || {}; } catch (e) { return {}; } },
+  save(o) { try { localStorage.setItem(KEY, JSON.stringify(o)); return true; } catch (e) { return false; } }
+};
+
+/* ───────── 내용: 마음 색, 낱말, 까닭, 나를 돕는 방법 ───────── */
+const MOODS = {
+  red: {
+    name: '빨강', friend: '불끈이', desc: '기운이 넘치고 불편해요',
+    words: ['화나요', '짜증나요', '답답해요', '불안해요'],
+    because: ['내 말을 들어 주지 않아서', '하기 싫은 일을 해야 해서', '너무 시끄러워서', '약속이 지켜지지 않아서'],
+    helpers: ['숨 크게 쉬기', '열까지 세기', '물 한 잔 마시기', '선생님께 말하기']
+  },
+  yellow: {
+    name: '노랑', friend: '반짝이', desc: '기운이 넘치고 기분 좋아요',
+    words: ['기뻐요', '신나요', '설레요', '뿌듯해요'],
+    because: ['친구와 재미있게 놀아서', '칭찬을 받아서', '좋아하는 것을 해서', '어려운 것을 해내서'],
+    helpers: ['기쁜 마음 나누기', '친구 칭찬하기', '고마운 사람에게 말하기', '이 기분 기억하기']
+  },
+  blue: {
+    name: '파랑', friend: '방울이', desc: '기운이 없고 불편해요',
+    words: ['슬퍼요', '지쳤어요', '외로워요', '심심해요'],
+    because: ['친구와 다퉈서', '몸이 피곤해서', '보고 싶은 사람이 있어서', '잘 안 돼서 속상해서'],
+    helpers: ['선생님이나 친구에게 말하기', '좋아하는 것 떠올리기', '잠깐 쉬기', '도와 달라고 하기']
+  },
+  green: {
+    name: '초록', friend: '산들이', desc: '차분하고 기분 좋아요',
+    words: ['편안해요', '고마워요', '차분해요', '든든해요'],
+    because: ['푹 쉬어서', '날씨가 좋아서', '친구가 도와줘서', '할 일을 다 해서'],
+    helpers: ['이 기분 기억하기', '친구 도와주기', '좋아하는 일 하기', '고마운 사람에게 말하기']
+  }
+};
+const MOOD_ORDER = ['red', 'yellow', 'blue', 'green'];      // 무드미터 자리: 위 왼쪽부터
+const CHART_ORDER = ['yellow', 'green', 'blue', 'red'];     // 우리 반 마음 색 그래프 순서
+const LEVELS = ['조금', '많이', '아주 많이'];
+const PASS = ['잘 모르겠어요', '말하고 싶지 않아요'];
+const FACES = {
+  '기뻐요': { eyes: 'happy', mouth: 'smile' },
+  '신나요': { eyes: 'happy', mouth: 'grin', brow: 'up', extra: 'spark' },
+  '설레요': { eyes: 'wide', mouth: 'smile', extra: 'heart' },
+  '뿌듯해요': { eyes: 'closed', mouth: 'grin' },
+  '편안해요': { eyes: 'closed', mouth: 'smile' },
+  '고마워요': { eyes: 'happy', mouth: 'smile', extra: 'heart' },
+  '차분해요': { eyes: 'dot', mouth: 'smile' },
+  '든든해요': { eyes: 'dot', mouth: 'grin', brow: 'up' },
+  '슬퍼요': { eyes: 'dot', mouth: 'frown', brow: 'sad', extra: 'tear' },
+  '지쳤어요': { eyes: 'closed', mouth: 'flat', extra: 'sweat' },
+  '외로워요': { eyes: 'down', mouth: 'frown', brow: 'sad' },
+  '심심해요': { eyes: 'dot', mouth: 'flat' },
+  '화나요': { eyes: 'dot', mouth: 'teeth', brow: 'angry', extra: 'steam' },
+  '짜증나요': { eyes: 'dot', mouth: 'frown', brow: 'angry' },
+  '답답해요': { eyes: 'closed', mouth: 'wavy', brow: 'angry' },
+  '불안해요': { eyes: 'wide', mouth: 'wavy', brow: 'sad', extra: 'sweat' }
+};
+const INSTS = {
+  rain: { name: '레인스틱', sound: '차르르르', tip: '문지르면 빗소리가 나요' },
+  chime: { name: '윈드차임', sound: '찰랑찰랑', tip: '쓸어 주면 찰랑거려요' },
+  triangle: { name: '트라이앵글', sound: '딩—', tip: '톡 치면 맑게 울려요' },
+  timpani: { name: '팀파니', sound: '둥!', tip: '힘껏 두드려요' }
+};
+const STICKERS = [
+  { id: 'same', label: '나도 그래', icon: `<circle cx="9" cy="12" r="5.6" fill="#FFC533" stroke="${INK}" stroke-width="1.6"/><circle cx="15" cy="12" r="5.6" fill="#5AA2F7" fill-opacity=".85" stroke="${INK}" stroke-width="1.6"/>` },
+  { id: 'cheer', label: '힘내', icon: `<path d="M12 2.8l2.7 5.9 6.4.7-4.8 4.3 1.4 6.3L12 16.8 6.3 20l1.4-6.3-4.8-4.3 6.4-.7z" fill="#FFC533" stroke="${INK}" stroke-width="1.6" stroke-linejoin="round"/>` },
+  { id: 'thanks', label: '고마워', icon: `<path d="M12 20.3C5.2 15.4 3.2 11.5 4.7 8.3 6.1 5.4 9.8 5.1 12 8c2.2-2.9 5.9-2.6 7.3.3 1.5 3.2-.5 7.1-7.3 12z" fill="#F2665E" stroke="${INK}" stroke-width="1.6" stroke-linejoin="round"/>` },
+  { id: 'play', label: '같이 놀자', icon: `<circle cx="12" cy="12" r="8.6" fill="#4CC38A" stroke="${INK}" stroke-width="1.6"/><path d="M4.6 8.4c4.4 2.2 10.4 2.2 14.8 0M4.6 15.6c4.4-2.2 10.4-2.2 14.8 0" fill="none" stroke="${INK}" stroke-width="1.4"/>` },
+  { id: 'pat', label: '토닥토닥', icon: `<path d="M7 18.5a4.6 4.6 0 0 1-.7-9.1 5.9 5.9 0 0 1 11.3 1.2 4 4 0 0 1-.6 7.9z" fill="#DAE9FF" stroke="${INK}" stroke-width="1.6" stroke-linejoin="round"/>` }
+];
+
+/* ───────── 그림: 아이콘, 마음 친구, 악기, 마음 날씨 ───────── */
+const ICON = {
+  speaker: '<path d="M4 9.5v5h3.6L13 19V5L7.6 9.5H4z"/><path d="M16.3 9a4.2 4.2 0 0 1 0 6M18.8 6.4a8 8 0 0 1 0 11.2"/>',
+  mic: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/>',
+  rec: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.8" fill="currentColor"/>',
+  list: '<path d="M9 6.5h11M9 12h11M9 17.5h11"/><circle cx="4.5" cy="6.5" r="1.2" fill="currentColor"/><circle cx="4.5" cy="12" r="1.2" fill="currentColor"/><circle cx="4.5" cy="17.5" r="1.2" fill="currentColor"/>',
+  cam: '<path d="M3.5 8.5a2 2 0 0 1 2-2h2.2l1.5-2h5.6l1.5 2h2.2a2 2 0 0 1 2 2v8.5a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/><circle cx="12" cy="12.8" r="3.6"/>',
+  hunt: '<circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/><circle cx="10.5" cy="10.5" r="2" fill="currentColor"/>',
+  pic: '<rect x="3" y="4.5" width="18" height="15" rx="2.5"/><circle cx="8.5" cy="9.5" r="1.8"/><path d="M4 17l5-4.5 3.5 3 3-2.5 4.5 4"/>',
+  touch: '<path d="M9 11V5.5a1.8 1.8 0 0 1 3.6 0V11l4.3 1.2a2 2 0 0 1 1.4 2.3l-.8 4a2 2 0 0 1-2 1.5h-4.3a2 2 0 0 1-1.6-.8L6 14.5a1.6 1.6 0 0 1 2.4-2z"/>',
+  shake: '<rect x="8" y="3.5" width="8" height="17" rx="2"/><path d="M4.5 8.5c-1 2-1 5 0 7M19.5 8.5c1 2 1 5 0 7"/>',
+  body: '<circle cx="12" cy="5" r="2.2"/><path d="M4.5 7.5l5 3.5h5l5-3.5M9.5 11v5l-2 5M14.5 11v5l2 5M9.5 16h5"/>'
+};
+const ic = n => `<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${ICON[n] || ''}</svg>`;
+
+function faceSVG(f, dy) {
+  const s = `fill="none" stroke="${INK}" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"`;
+  const eyes = f.eyes || 'dot', mouth = f.mouth || 'smile', brow = f.brow || '', extra = f.extra || '';
+  let o = `<circle cx="27" cy="68" r="5" fill="#FFFFFF" opacity=".35"/><circle cx="73" cy="68" r="5" fill="#FFFFFF" opacity=".35"/>`;
+  if (eyes === 'dot') o += `<circle cx="38" cy="58" r="4.2" fill="${INK}"/><circle cx="62" cy="58" r="4.2" fill="${INK}"/>`;
+  if (eyes === 'down') o += `<circle cx="38" cy="61" r="4" fill="${INK}"/><circle cx="62" cy="61" r="4" fill="${INK}"/><path d="M32.5 55.5h11M56.5 55.5h11" ${s}/>`;
+  if (eyes === 'happy') o += `<path d="M32.5 60Q38 51 43.5 60M56.5 60Q62 51 67.5 60" ${s}/>`;
+  if (eyes === 'closed') o += `<path d="M32.5 57Q38 63 43.5 57M56.5 57Q62 63 67.5 57" ${s}/>`;
+  if (eyes === 'wide') o += `<circle cx="38" cy="57" r="6.2" fill="#FFFFFF" stroke="${INK}" stroke-width="2.6"/><circle cx="62" cy="57" r="6.2" fill="#FFFFFF" stroke="${INK}" stroke-width="2.6"/><circle cx="38" cy="58" r="2.7" fill="${INK}"/><circle cx="62" cy="58" r="2.7" fill="${INK}"/>`;
+  if (brow === 'angry') o += `<path d="M30 46.5L44 51.5M70 46.5L56 51.5" ${s}/>`;
+  if (brow === 'sad') o += `<path d="M30 50.5L43 46M70 50.5L57 46" ${s}/>`;
+  if (brow === 'up') o += `<path d="M31 47Q37.5 42 44 46M56 46Q62.5 42 69 47" ${s}/>`;
+  if (mouth === 'smile') o += `<path d="M41 69Q50 78 59 69" ${s}/>`;
+  if (mouth === 'grin') o += `<path d="M39 68Q50 84 61 68Z" fill="${INK}" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>`;
+  if (mouth === 'flat') o += `<path d="M43 72H57" ${s}/>`;
+  if (mouth === 'frown') o += `<path d="M42 75Q50 67 58 75" ${s}/>`;
+  if (mouth === 'wavy') o += `<path d="M39 73q3.7-5 7.3 0t7.3 0 7.3 0" ${s}/>`;
+  if (mouth === 'teeth') o += `<rect x="40" y="67.5" width="20" height="9.5" rx="3" fill="#FFFFFF" stroke="${INK}" stroke-width="2.6"/><path d="M46.7 68v8.5M53.3 68v8.5" fill="none" stroke="${INK}" stroke-width="1.8"/>`;
+  if (extra === 'tear') o += `<path d="M68 63q-4.2 6.2 0 9.4 4.2-3.2 0-9.4z" fill="#FFFFFF" stroke="${INK}" stroke-width="1.8" stroke-linejoin="round"/>`;
+  if (extra === 'sweat') o += `<path d="M77 38q-4.6 7 0 10.4 4.6-3.4 0-10.4z" fill="#FFFFFF" stroke="${INK}" stroke-width="1.8" stroke-linejoin="round"/>`;
+  if (extra === 'spark') o += `<path d="M80 16l2.4 6.6L89 25l-6.6 2.4L80 34l-2.4-6.6L71 25l6.6-2.4z" fill="#FFFFFF" stroke="${INK}" stroke-width="1.8" stroke-linejoin="round"/>`;
+  if (extra === 'heart') o += `<path d="M80 33c-7.4-5.4-6-12.4 0-8.6 6-3.8 7.4 3.2 0 8.6z" fill="#FFFFFF" stroke="${INK}" stroke-width="1.8" stroke-linejoin="round"/>`;
+  if (extra === 'steam') o += `<path d="M17 30q-5-5 0-10M25 25q-5-5 0-10" ${s}/>`;
+  return `<g transform="translate(0 ${dy})">${o}</g>`;
+}
+const STAR = (() => { const p = []; for (let i = 0; i < 16; i++) { const r = i % 2 ? 31 : 41, a = (i * 22.5 - 90) * Math.PI / 180; p.push((50 + r * Math.cos(a)).toFixed(1) + ',' + (54 + r * Math.sin(a)).toFixed(1)); } return p.join(' '); })();
+function bodySVG(color) {
+  const f = HEX[color], o = `stroke="${INK}" stroke-width="3" stroke-linejoin="round"`;
+  if (color === 'yellow') return `<polygon points="${STAR}" fill="${INK}" stroke="${INK}" stroke-width="14" stroke-linejoin="round"/><polygon points="${STAR}" fill="${f}" stroke="${f}" stroke-width="8" stroke-linejoin="round"/>`;
+  if (color === 'green') return `<path d="M50 24C46 12 54 4 67 5 68 17 61 24 50 24z" fill="${f}" ${o}/><path d="M50 22c26 0 37 18 37 37 0 21-16 34-37 34S13 80 13 59c0-19 11-37 37-37z" fill="${f}" ${o}/>`;
+  if (color === 'blue') return `<path d="M50 5C41 25 15 43 15 64c0 18 15 30 35 30s35-12 35-30C85 43 59 25 50 5z" fill="${f}" ${o}/>`;
+  return `<path d="M53 4c4 16 31 30 31 58 0 20-15 32-34 32S16 82 16 62c0-14 9-22 13-35 6 9 11 9 13-1 2-10 7-16 11-22z" fill="${f}" ${o}/>`;
+}
+const FACE_DY = { yellow: -5, green: 2, blue: 7, red: 7 };
+/* 마음 친구: 색마다 모양이 달라요(별, 새싹, 물방울, 불꽃). 낱말에 따라 표정이 바뀌어요. */
+function friendInner(color, word) {
+  const face = FACES[word] || FACES[MOODS[color].words[0]];
+  return bodySVG(color) + faceSVG(face, FACE_DY[color]);
+}
+function friendSVG(color, word, cls) {
+  return `<svg class="friend${cls ? ' ' + cls : ''}" viewBox="0 0 100 100" aria-hidden="true" focusable="false">${friendInner(color, word)}</svg>`;
+}
+const friendFile = (color, word) => `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 100 100">${friendInner(color, word)}</svg>`;
+
+function instSVG(id, cls) {
+  const L = 'class="i-line" fill="none"';
+  let g;
+  if (id === 'rain') {
+    g = `<g transform="rotate(-24 100 100)"><rect x="14" y="78" width="172" height="44" rx="22" class="i-wood i-line"/>` +
+      `<path d="M44 78v44M60 78v44M140 78v44M156 78v44" ${L}/>` +
+      [[84, 92], [98, 106], [112, 90], [122, 104], [76, 108], [104, 96]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="3.4" class="i-dark"/>`).join('') + `</g>` +
+      `<path d="M150 150l8 14M166 142l8 14M134 160l8 14" fill="none" stroke="#5AA2F7" stroke-width="5" stroke-linecap="round"/>`;
+  } else if (id === 'chime') {
+    g = `<path d="M100 14v14" ${L}/><rect x="36" y="28" width="128" height="16" rx="8" class="i-wood i-line"/>` +
+      [0, 1, 2, 3, 4, 5].map(i => { const x = 52 + i * 19.2, h = 122 - i * 15; return `<path d="M${x} 44v12" ${L}/><rect x="${x - 6}" y="56" width="12" height="${h}" rx="6" class="i-metal i-line"/>`; }).join('');
+  } else if (id === 'triangle') {
+    const p = 'M84 92L100 44l62 116H40l26-48';
+    g = `<path d="M100 20v22" ${L}/><path d="${p}" fill="none" class="i-edge" stroke-width="17" stroke-linecap="round" stroke-linejoin="round"/>` +
+      `<path d="${p}" fill="none" style="stroke:var(--metal)" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>` +
+      `<path d="M150 40l30 52" fill="none" class="i-edge" stroke-width="10" stroke-linecap="round"/><path d="M150 40l30 52" fill="none" style="stroke:var(--metal)" stroke-width="4.5" stroke-linecap="round"/>`;
+  } else {
+    g = `<path d="M62 150l-14 34M138 150l14 34M100 158v26" ${L}/>` +
+      `<path d="M32 84c0 50 30 78 68 78s68-28 68-78z" class="i-copper i-line"/>` +
+      `<ellipse cx="100" cy="84" rx="68" ry="20" class="i-skin i-line"/>` +
+      `<path d="M48 22l34 46" ${L}/><circle cx="46" cy="20" r="10" class="i-skin i-line"/>` +
+      `<path d="M156 26l-34 44" ${L}/><circle cx="158" cy="24" r="10" class="i-skin i-line"/>`;
+  }
+  return `<svg class="${cls || 'inst'}" viewBox="0 0 200 200" aria-hidden="true" focusable="false">${g}</svg>`;
+}
+
+const cloudArt = (x, y, k, fill) => `<path transform="translate(${x} ${y}) scale(${k})" d="M10 30C1 30-1 19 8 16 6 7 18 3 23 9 28-1 44 1 46 12c9-1 12 14 2 18z" fill="${fill}" stroke="${INK}" stroke-width="${(2.2 / k).toFixed(2)}" stroke-linejoin="round"/>`;
+const star4 = (x, y, r) => `<path d="M${x} ${y - r}l${r * .3} ${r * .7} ${r * .7} ${r * .3}-${r * .7} ${r * .3}-${r * .3} ${r * .7}-${r * .3}-${r * .7}-${r * .7}-${r * .3} ${r * .7}-${r * .3}z" fill="#FFE9A8"/>`;
+const PICS = {
+  sun: { label: '해가 쨍쨍', art: () => `<rect width="100" height="75" fill="#BDE3FF"/>` + [0, 45, 90, 135, 180, 225, 270, 315].map(a => `<path d="M50 13v8" transform="rotate(${a} 50 37)" fill="none" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>`).join('') + `<circle cx="50" cy="37" r="14" fill="#FFC533" stroke="${INK}" stroke-width="2.2"/>` },
+  cloud: { label: '구름이 뭉게뭉게', art: () => `<rect width="100" height="75" fill="#CFE9FF"/>` + cloudArt(10, 10, 1.05, '#FFFFFF') + cloudArt(46, 36, .85, '#FFFFFF') },
+  rain: { label: '비가 주룩주룩', art: () => `<rect width="100" height="75" fill="#AEBFDD"/>` + cloudArt(22, 4, 1.2, '#E9EEF8') + `<path d="M34 48l-4 10M48 48l-4 10M62 48l-4 10M76 48l-4 10M41 60l-4 10M55 60l-4 10M69 60l-4 10" fill="none" stroke="#3B82E0" stroke-width="3" stroke-linecap="round"/>` },
+  storm: { label: '번개가 번쩍', art: () => `<rect width="100" height="75" fill="#6F7AA6"/>` + cloudArt(20, 2, 1.25, '#C9CEDD') + `<path d="M54 36L41 55h9l-5 16 17-22h-9l6-13z" fill="#FFC533" stroke="${INK}" stroke-width="2" stroke-linejoin="round"/>` },
+  rainbow: { label: '무지개가 활짝', art: () => `<rect width="100" height="75" fill="#D8F0FF"/>` + [['#F2665E', 42], ['#FFC533', 35], ['#4CC38A', 28], ['#5AA2F7', 21]].map(([c, r]) => `<path d="M${50 - r} 68a${r} ${r} 0 0 1 ${r * 2} 0" fill="none" stroke="${c}" stroke-width="7"/>`).join('') + cloudArt(-6, 48, .72, '#FFFFFF') + cloudArt(70, 48, .72, '#FFFFFF') },
+  wind: { label: '바람이 쌩쌩', art: () => `<rect width="100" height="75" fill="#D9F4E6"/><path d="M10 26h44a8 8 0 1 0-8-8M10 40h66a8 8 0 1 1-8 8M10 54h32a6.5 6.5 0 1 1-6.5 6.5" fill="none" stroke="${INK}" stroke-width="3.2" stroke-linecap="round"/><path d="M78 24c6-8 14-6 14 2-6 6-12 4-14-2z" fill="#4CC38A" stroke="${INK}" stroke-width="2" stroke-linejoin="round"/>` },
+  snow: { label: '눈이 펑펑', art: () => `<rect width="100" height="75" fill="#C7D7F2"/>` + cloudArt(22, 2, 1.2, '#FFFFFF') + [[30, 50], [44, 56], [58, 50], [72, 56], [36, 66], [52, 68], [66, 66]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="3.2" fill="#FFFFFF" stroke="${INK}" stroke-width="1.6"/>`).join('') },
+  night: { label: '별이 반짝', art: () => `<rect width="100" height="75" fill="#2B2F63"/><path d="M68 12a17 17 0 1 0 15 27 14 14 0 0 1-15-27z" fill="#FFE9A8" stroke="${INK}" stroke-width="2" stroke-linejoin="round"/>` + star4(22, 18, 7) + star4(40, 46, 5) + star4(22, 58, 4) + star4(86, 60, 5) }
+};
+const picSVG = (id, attrs) => `<svg viewBox="0 0 100 75" preserveAspectRatio="xMidYMid slice" ${attrs || 'aria-hidden="true" focusable="false"'}>${PICS[id].art()}</svg>`;
+const picFile = id => `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 100 75">${PICS[id].art()}</svg>`;
+
+function heroSVG() {
+  const seat = (c, x, y, k, d) => `<g transform="translate(${x} ${y}) scale(${k})"><g class="bob" style="transform-box:fill-box;animation-delay:${d}s">${friendInner(c, MOODS[c].words[0])}</g></g>`;
+  return `<svg viewBox="0 0 240 212" aria-hidden="true" focusable="false">` +
+    `<path d="M120 14C58 14 12 54 12 108c0 52 44 90 104 90 22 0 30-10 26-24-4-13 4-22 20-22h28c24 0 38-16 38-44 0-50-46-94-108-94z" style="fill:var(--surface);stroke:var(--ink)" stroke-width="4" stroke-linejoin="round"/>` +
+    `<ellipse cx="184" cy="118" rx="15" ry="12" style="fill:var(--bg);stroke:var(--ink)" stroke-width="4"/>` +
+    seat('red', 26, 60, .62, -.2) + seat('yellow', 84, 22, .68, -1.1) + seat('green', 148, 44, .6, -1.9) + seat('blue', 70, 108, .62, -2.6) + `</svg>`;
+}
+const BRAND = `<svg viewBox="0 0 36 36" aria-hidden="true" focusable="false"><path d="M18 3C9 3 3 9 3 17c0 8 6.5 13 15 13 3 0 4.4-1.4 3.8-3.4-.6-2 .6-3.4 3-3.4h3c3.4 0 5.2-2.4 5.2-6.4C33 9 27 3 18 3z" style="fill:var(--surface);stroke:var(--ink)" stroke-width="2.2" stroke-linejoin="round"/><circle cx="10.5" cy="13.5" r="3.3" fill="#F2665E"/><circle cx="18" cy="9.3" r="3.3" fill="#FFC533"/><circle cx="25.5" cy="13.5" r="3.3" fill="#4CC38A"/><circle cx="11" cy="21.5" r="3.3" fill="#5AA2F7"/></svg>`;
+
+/* ───────── 설정과 상태 ───────── */
+const saved = mem.load();
+const S = Object.assign({ mode: 'free', text: 'normal', words: 8, contrast: false, tts: false, captions: true, sound: true, motion: false }, saved.settings || {});
+let wall = Array.isArray(saved.wall) ? saved.wall : [];
+let usedBefore = !!saved.used;
+const voices = new Map();      // 카드 id → 목소리(이 화면이 열려 있는 동안만)
+
+/* ───────── 소리: 악기, 감정 음악, 효과음 (파일 없이 Web Audio로 합성) ───────── */
+const Sound = (() => {
+  let ctx = null, master = null, bus = null, noiseBuf = null, timer = null, cur = null, step = 0, nextT = 0, root = 45;
+  const midi = n => 440 * Math.pow(2, (n - 69) / 12);
+  const PENTA = [69, 72, 74, 76, 79, 81, 84, 86, 88];
+  const MUSIC = {
+    yellow: { bpm: 104, root: 48, chords: [[60, 64, 67], [65, 69, 72], [67, 71, 74], [60, 64, 67]], style: 'bounce' },
+    green: { bpm: 66, root: 48, chords: [[60, 64, 67, 71], [65, 69, 72, 76]], style: 'float' },
+    blue: { bpm: 58, root: 45, chords: [[57, 60, 64], [53, 57, 60], [60, 64, 67], [52, 55, 59]], style: 'slow' },
+    red: { bpm: 126, root: 45, chords: [[57, 60, 64], [57, 60, 64], [53, 57, 60], [55, 59, 62]], style: 'drive' }
+  };
+  function ensure() {
+    if (!S.sound) return null;
+    if (!ctx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      try { ctx = new AC(); } catch (e) { return null; }
+      const comp = ctx.createDynamicsCompressor();
+      comp.threshold.value = -16; comp.knee.value = 12; comp.ratio.value = 5; comp.attack.value = 0.004; comp.release.value = 0.2;
+      master = ctx.createGain(); master.gain.value = 0.78;
+      master.connect(comp); comp.connect(ctx.destination);
+      const len = ctx.sampleRate * 2; noiseBuf = ctx.createBuffer(1, len, ctx.sampleRate);
+      const d = noiseBuf.getChannelData(0); for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+    }
+    if (ctx.state === 'suspended') { try { ctx.resume().catch(() => {}); } catch (e) {} }
+    return ctx;
+  }
+  function tone(f, t, o) {
+    o = o || {};
+    const type = o.type || 'sine', a = o.a || 0.006, d = o.d || 0.6, peak = o.peak || 0.2, dest = o.dest || master;
+    const osc = ctx.createOscillator(), g = ctx.createGain();
+    osc.type = type; osc.frequency.setValueAtTime(f, t);
+    if (o.slide) osc.frequency.exponentialRampToValueAtTime(Math.max(20, f * o.slide), t + Math.min(d, 0.22));
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0002, peak), t + a);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + a + d);
+    osc.connect(g); g.connect(dest); osc.start(t); osc.stop(t + a + d + 0.05);
+  }
+  function hiss(t, o) {
+    o = o || {};
+    const a = o.a || 0.002, d = o.d || 0.05, peak = o.peak || 0.1;
+    const src = ctx.createBufferSource(); src.buffer = noiseBuf; src.loop = true;
+    const flt = ctx.createBiquadFilter(); flt.type = o.type || 'bandpass'; flt.frequency.value = o.f || 4000; flt.Q.value = o.q || 4;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0002, peak), t + a);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + a + d);
+    src.connect(flt); flt.connect(g); g.connect(o.dest || master);
+    src.start(t, Math.random() * 1.5); src.stop(t + a + d + 0.05);
+  }
+  const play = {
+    rain(s, t) {
+      const n = 14 + Math.round(s * 22), dur = 0.6 + s * 0.9;
+      hiss(t, { a: 0.12, d: dur, peak: 0.5 * s + 0.15, f: 3600, q: 0.6 });                      // 쏴아— 하는 바탕 소리
+      for (let i = 0; i < n; i++) hiss(t + Math.random() * dur, { d: 0.02 + Math.random() * 0.05, peak: 0.4 + 1.1 * s * Math.random(), f: 2200 + Math.random() * 5200, q: 3 });   // 알갱이
+    },
+    chime(s, t) { const n = 3 + Math.round(s * 4); let tt = t; for (let i = 0; i < n; i++) { const f = midi(PENTA[2 + Math.floor(Math.random() * 7)]); tone(f, tt, { d: 1.9, peak: 0.1 + 0.1 * s }); tone(f * 2.76, tt, { d: 0.8, peak: 0.035 }); tt += 0.05 + Math.random() * 0.1; } },
+    triangle(s, t) { const f = 1320, k = 0.45 + s * 0.6; [[1, .2, 2.6], [2.76, .1, 1.9], [5.4, .06, 1.2], [8.93, .025, .7]].forEach(p => tone(f * p[0], t, { d: p[2], peak: p[1] * k, a: 0.002 })); hiss(t, { d: 0.02, peak: 0.07 * k, f: 7000, q: 0.8, type: 'highpass' }); },
+    timpani(s, t) { const k = 0.5 + s * 0.6, f = midi(root); tone(f * 1.7, t, { slide: 1 / 1.7, d: 1.1, peak: 0.75 * k, a: 0.004 }); tone(f * 1.5, t, { d: 0.7, peak: 0.16 * k }); hiss(t, { d: 0.07, peak: 0.35 * k, f: 260, q: 0.7, type: 'lowpass' }); }
+  };
+  function hit(inst, s) { const c = ensure(); if (!c) return false; (play[inst] || play.triangle)(clamp(s, 0.15, 1), c.currentTime + 0.005); return true; }
+  function stepNote(m, i, t) {
+    const bar = Math.floor(i / 8) % m.chords.length, s = i % 8, ch = m.chords[bar], spb = 60 / m.bpm / 2;
+    if (m.style === 'bounce') {
+      if (s === 0 || s === 4) tone(midi(ch[0] - 24), t, { type: 'triangle', d: spb * 1.6, peak: 0.16, dest: bus });
+      tone(midi(ch[[0, 1, 2, 1, 0, 2, 1, 2][s]] + (s % 4 === 3 ? 12 : 0)), t, { type: 'triangle', d: spb * 0.9, peak: 0.07, dest: bus });
+    } else if (m.style === 'float') {
+      if (s === 0) ch.forEach((n, k) => tone(midi(n - 12), t + k * 0.03, { a: 0.5, d: spb * 7.5, peak: 0.05, dest: bus }));
+      if (s === 0 || s === 3 || s === 6) tone(midi(ch[(s + bar) % ch.length] + 12), t, { d: spb * 3, peak: 0.06, dest: bus });
+    } else if (m.style === 'slow') {
+      if (s === 0) ch.forEach((n, k) => tone(midi(n - 12), t + k * 0.04, { a: 0.6, d: spb * 7.5, peak: 0.055, dest: bus }));
+      if (s === 0 || s === 4) tone(midi(ch[s === 0 ? 2 : 1] + 12), t, { d: spb * 3.6, peak: 0.06, dest: bus });
+    } else {
+      tone(midi(ch[0] - 24), t, { type: 'sawtooth', d: spb * 0.55, peak: 0.08, dest: bus });
+      if (s === 2 || s === 6) ch.forEach(n => tone(midi(n), t, { type: 'square', d: spb * 0.5, peak: 0.022, dest: bus }));
+      if (s === 0 || s === 4) tone(110, t, { slide: 0.5, d: 0.16, peak: 0.22, dest: bus });
+    }
+  }
+  function tick() { if (!cur || !ctx) return; const spb = 60 / cur.bpm / 2; while (nextT < ctx.currentTime + 0.18) { stepNote(cur, step, nextT); nextT += spb; step++; } }
+  function stop() {
+    if (timer) { clearInterval(timer); timer = null; }
+    if (bus && ctx) { try { bus.gain.setTargetAtTime(0.0001, ctx.currentTime, 0.06); } catch (e) {} }
+    bus = null; cur = null;
+  }
+  function music(mood) {
+    stop();
+    const c = ensure(); if (!c || !MUSIC[mood]) return false;
+    bus = c.createGain(); bus.gain.value = 0.9;
+    const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2400;
+    bus.connect(lp); lp.connect(master);
+    cur = MUSIC[mood]; step = 0; nextT = c.currentTime + 0.06; tick(); timer = setInterval(tick, 50);
+    return true;
+  }
+  function blip(kind) {
+    const c = ensure(); if (!c) return; const t = c.currentTime + 0.005;
+    if (kind === 'ok') { tone(midi(76), t, { d: 0.25, peak: 0.12 }); tone(midi(81), t + 0.09, { d: 0.35, peak: 0.12 }); tone(midi(88), t + 0.18, { d: 0.5, peak: 0.1 }); }
+    else if (kind === 'in') tone(midi(64), t, { a: 0.5, d: 3, peak: 0.05 });
+    else if (kind === 'out') tone(midi(57), t, { a: 0.5, d: 3, peak: 0.05 });
+    else tone(midi(79), t, { d: 0.12, peak: 0.07 });
+  }
+  return { ensure, hit, music, stop, blip, setMood(m) { if (MUSIC[m]) root = MUSIC[m].root; }, get playing() { return !!timer; }, get context() { return ctx; } };
+})();
+
+/* ───────── 말: 자막과 읽어 주기 ───────── */
+const capEl = $('#caption');
+let capTimer = 0, capLast = '', capAt = 0;
+function caption(text, ms) {
+  if (!text) return;
+  capEl.textContent = text; capEl.classList.add('on'); capLast = text; capAt = Date.now();
+  clearTimeout(capTimer); capTimer = setTimeout(() => capEl.classList.remove('on'), ms || 3600);
+}
+function soundCaption(text) { if (text !== capLast || Date.now() - capAt > 1200) caption(text, 2200); }
+const Voice = {
+  ok: 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window, v: null,
+  init() {
+    if (!this.ok) return;
+    const pick = () => { try { this.v = speechSynthesis.getVoices().find(x => /^ko/i.test(x.lang)) || null; } catch (e) {} };
+    pick(); try { speechSynthesis.addEventListener('voiceschanged', pick); } catch (e) {}
+  },
+  say(text) {
+    if (!text) return;
+    caption(text, Math.max(3200, text.length * 170));
+    if (!this.ok) return;
+    try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = 'ko-KR'; if (this.v) u.voice = this.v; u.rate = 0.92; speechSynthesis.speak(u); } catch (e) {}
+  },
+  stop() { if (this.ok) { try { speechSynthesis.cancel(); } catch (e) {} } }
+};
+
+/* ───────── 기기: 카메라, 색 읽기, 움직임, 마이크 ───────── */
+const hasMedia = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+const Cam = {
+  stream: null, video: null,
+  async start(video, facing) {
+    this.stop();
+    if (!hasMedia) { const e = new Error('no media'); e.name = 'NoMedia'; throw e; }
+    const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false });
+    this.stream = s; this.video = video;
+    video.srcObject = s; video.muted = true; video.setAttribute('playsinline', '');
+    try { await video.play(); } catch (e) {}
+    return s;
+  },
+  stop() {
+    if (this.stream) { this.stream.getTracks().forEach(t => t.stop()); this.stream = null; }
+    if (this.video) { try { this.video.srcObject = null; } catch (e) {} this.video = null; }
+  }
+};
+function camWhy(e) {
+  const n = e && e.name;
+  if (!hasMedia || n === 'NoMedia') return '이 화면에서는 카메라를 켤 수 없어요.';
+  if (n === 'NotFoundError' || n === 'OverconstrainedError') return '이 기기에서 카메라를 찾지 못했어요.';
+  if (n === 'NotAllowedError' || n === 'SecurityError') return '카메라를 쓸 수 없어요. 권한이 꺼져 있거나 이 화면에서 막혀 있어요.';
+  return '카메라를 켜지 못했어요.';
+}
+function micWhy(e) {
+  const n = e && e.name;
+  if (!hasMedia || n === 'NoMedia') return '이 화면에서는 마이크를 켤 수 없어요.';
+  if (n === 'NotFoundError') return '이 기기에서 마이크를 찾지 못했어요.';
+  if (n === 'NotAllowedError' || n === 'SecurityError') return '마이크를 쓸 수 없어요. 권한이 꺼져 있거나 이 화면에서 막혀 있어요.';
+  return '마이크를 켜지 못했어요.';
+}
+function rgbToHsl(r, g, b) {
+  r /= 255; g /= 255; b /= 255;
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, d = mx - mn;
+  if (!d) return [0, 0, l];
+  const s = d / (1 - Math.abs(2 * l - 1));
+  let h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  h *= 60; if (h < 0) h += 360;
+  return [h, s, l];
+}
+/* 카메라가 본 색을 네 가지 마음 색 가운데 하나로 읽어요. 흐리거나 너무 어두우면 '모름'. */
+function classifyColor(r, g, b) {
+  const [h, s, l] = rgbToHsl(r, g, b);
+  if (l < 0.14 || l > 0.93 || s < 0.26) return null;
+  if (h >= 330 || h < 20) return 'red';
+  if (h >= 34 && h < 72) return l >= 0.34 ? 'yellow' : null;
+  if (h >= 78 && h < 170) return 'green';
+  if (h >= 180 && h < 262) return 'blue';
+  return 'other';
+}
+function grabFrame(video, max, mirror) {
+  const vw = video.videoWidth, vh = video.videoHeight; if (!vw || !vh) return null;
+  const k = Math.min(1, max / Math.max(vw, vh)), cv = D.createElement('canvas');
+  cv.width = Math.round(vw * k); cv.height = Math.round(vh * k);
+  const x = cv.getContext('2d');
+  if (mirror) { x.translate(cv.width, 0); x.scale(-1, 1); }
+  x.drawImage(video, 0, 0, cv.width, cv.height);
+  return cv.toDataURL('image/jpeg', 0.82);
+}
+function loadImg(src) { return new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => rej(new Error('img')); im.src = src; }); }
+async function shrink(src, max, q) {
+  const im = await loadImg(src), k = Math.min(1, max / Math.max(im.width, im.height)), cv = D.createElement('canvas');
+  cv.width = Math.max(1, Math.round(im.width * k)); cv.height = Math.max(1, Math.round(im.height * k));
+  cv.getContext('2d').drawImage(im, 0, 0, cv.width, cv.height);
+  return cv.toDataURL('image/jpeg', q || 0.8);
+}
+const readFile = file => new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = () => rej(fr.error); fr.readAsDataURL(file); });
+
+/* 기기 흔들기: 흔드는 세기를 연주 세기로 바꿔요 */
+const Shake = {
+  on: false, fn: null, got: false,
+  async start(onHit) {
+    this.stop();
+    if (!('DeviceMotionEvent' in window)) throw new Error('none');
+    if (typeof DeviceMotionEvent.requestPermission === 'function') {
+      const r = await DeviceMotionEvent.requestPermission();
+      if (r !== 'granted') throw new Error('denied');
+    }
+    let last = 0; this.got = false;
+    this.fn = e => {
+      let m = 0; const a = e.acceleration;
+      if (a && a.x != null) m = Math.hypot(a.x || 0, a.y || 0, a.z || 0);
+      else { const g = e.accelerationIncludingGravity; if (!g || g.x == null) return; m = Math.abs(Math.hypot(g.x || 0, g.y || 0, g.z || 0) - 9.81); }
+      this.got = true;
+      const now = performance.now();
+      if (m > 7 && now - last > 160) { last = now; onHit(clamp((m - 7) / 22, 0.25, 1)); }
+    };
+    window.addEventListener('devicemotion', this.fn);
+    this.on = true;
+    await new Promise(r => setTimeout(r, 1200));
+    if (!this.got) { this.stop(); throw new Error('silent'); }
+  },
+  stop() { if (this.fn) window.removeEventListener('devicemotion', this.fn); this.fn = null; this.on = false; }
+};
+/* 몸 움직이기: 카메라 화면이 얼마나 바뀌는지로 움직임을 알아채요 */
+const BodyMove = {
+  timer: null,
+  async start(video, onHit, onLevel) {
+    this.stop();
+    await Cam.start(video, 'user');
+    const cv = D.createElement('canvas'); cv.width = 48; cv.height = 36;
+    const x = cv.getContext('2d', { willReadFrequently: true });
+    let prev = null, last = 0, warm = 0;
+    this.timer = setInterval(() => {
+      if (video.readyState < 2 || !video.videoWidth) return;
+      x.drawImage(video, 0, 0, 48, 36);
+      const d = x.getImageData(0, 0, 48, 36).data, lum = new Uint8Array(48 * 36);
+      for (let i = 0; i < lum.length; i++) lum[i] = (d[i * 4] * 3 + d[i * 4 + 1] * 6 + d[i * 4 + 2]) / 10;
+      if (prev && ++warm > 4) {
+        let n = 0; for (let i = 0; i < lum.length; i++) if (Math.abs(lum[i] - prev[i]) > 20) n++;
+        const level = n / lum.length; onLevel(clamp(level * 4, 0, 1));
+        const now = performance.now();
+        if (level > 0.06 && now - last > 240) { last = now; onHit(clamp(level * 4, 0.25, 1)); }
+      }
+      prev = lum;
+    }, 90);
+  },
+  stop() { if (this.timer) { clearInterval(this.timer); this.timer = null; } Cam.stop(); }
+};
+/* 마이크 소리 크기: 후— 부는 숨을 알아채요 */
+const Blow = {
+  stream: null, raf: 0, ac: null,
+  async start(onLevel) {
+    this.stop();
+    if (!hasMedia) { const e = new Error('no media'); e.name = 'NoMedia'; throw e; }
+    const s = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }, video: false });
+    this.stream = s;
+    const AC = window.AudioContext || window.webkitAudioContext; this.ac = new AC();
+    const an = this.ac.createAnalyser(); an.fftSize = 1024;
+    this.ac.createMediaStreamSource(s).connect(an);
+    const buf = new Float32Array(an.fftSize); let smooth = 0;
+    const loop = () => {
+      an.getFloatTimeDomainData(buf);
+      let sum = 0; for (let i = 0; i < buf.length; i++) sum += buf[i] * buf[i];
+      smooth = smooth * 0.8 + Math.sqrt(sum / buf.length) * 0.2;
+      onLevel(clamp(smooth * 9, 0, 1));
+      this.raf = requestAnimationFrame(loop);
+    };
+    loop();
+  },
+  stop() {
+    cancelAnimationFrame(this.raf); this.raf = 0;
+    if (this.stream) { this.stream.getTracks().forEach(t => t.stop()); this.stream = null; }
+    if (this.ac) { try { this.ac.close(); } catch (e) {} this.ac = null; }
+  }
+};
+
+/* ───────── 카드 한 장 ───────── */
+function newCard(name) {
+  return { id: 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name: name || '', color: null, word: null, level: 2, photo: null, foundColor: null, pic: null, text: '', inst: 'rain', hits: null, helper: null, breath: false, stickers: {}, at: Date.now(), posted: false };
+}
+const SAMPLES = [
+  { id: 's1', sample: true, name: '하늘', color: 'yellow', word: '신나요', level: 3, pic: 'rainbow', text: '친구와 재미있게 놀아서', inst: 'chime', hits: [{ t: 300, s: .6 }, { t: 1100, s: .8 }, { t: 1900, s: .5 }, { t: 2700, s: .9 }, { t: 3900, s: .6 }, { t: 5200, s: .8 }], helper: '기쁜 마음 나누기', stickers: { same: 2, thanks: 1 }, at: Date.now() },
+  { id: 's2', sample: true, name: '바다', color: 'blue', word: '지쳤어요', level: 2, pic: 'rain', text: '몸이 피곤해서', inst: 'rain', hits: [{ t: 400, s: .4 }, { t: 2200, s: .5 }, { t: 4300, s: .4 }, { t: 6400, s: .3 }], helper: '잠깐 쉬기', stickers: { pat: 3 }, at: Date.now() },
+  { id: 's3', sample: true, name: '솔', color: 'green', word: '편안해요', level: 2, pic: 'wind', text: '푹 쉬어서', inst: 'triangle', hits: [{ t: 500, s: .5 }, { t: 3000, s: .5 }, { t: 5600, s: .6 }], helper: '친구 도와주기', stickers: { same: 1 }, at: Date.now() },
+  { id: 's4', sample: true, name: '별', color: 'red', word: '답답해요', level: 1, pic: 'storm', text: '너무 시끄러워서', inst: 'timpani', hits: [{ t: 300, s: .9 }, { t: 800, s: .9 }, { t: 1300, s: 1 }, { t: 2600, s: .7 }, { t: 4200, s: .5 }], helper: '숨 크게 쉬기', stickers: { cheer: 2, pat: 1 }, at: Date.now() }
+];
+const STEPS = [['mood', '색', '마음 색 고르기'], ['photo', '장면', '마음 장면 담기'], ['voice', '말', '마음 말하기'], ['music', '소리', '마음 소리 연주하기'], ['calm', '숨', '숨 고르기'], ['card', '카드', '마음 카드 나누기']];
+const SAY = {
+  home: '오늘 내 마음은 무슨 색일까요? 시작하기를 눌러요.',
+  mood: '지금 내 마음은 어떤 색에 가까워요? 네 가지 색 가운데 하나를 골라요.',
+  photo: '내 마음을 보여 주는 장면을 담아요. 색 찾기 탐험, 사진 찍기, 그림 고르기 가운데 하나를 골라요.',
+  voice: '왜 그런 마음이 들었나요? 말하기, 목소리 담기, 문장 고르기 가운데 하나를 골라요. 건너뛰어도 괜찮아요.',
+  music: '내 마음을 소리로 연주해요. 악기를 고르고, 가운데 큰 판을 눌러 연주해요.',
+  calm: '천천히 숨을 골라요. 숨쉬기 시작을 누르고 세 번 함께 숨 쉬어요. 그다음 나를 돕는 방법을 하나 골라요.',
+  card: '내 마음 카드가 완성됐어요. 카드 읽어 주기를 누르면 카드를 소리로 들려줘요.',
+  wall: '우리 반 팔레트예요. 친구의 마음 카드를 눌러 보고 응원 스티커를 붙여 줘요.'
+};
+
+const app = $('#app');
+let card = newCard('');
+let screen = 'home', reached = 0;
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const dateText = t => { const d = new Date(t || Date.now()); return `${d.getMonth() + 1}월 ${d.getDate()}일`; };
+const sayLine = c => (c.color && c.word ? `나는 지금 ${LEVELS[(c.level || 2) - 1]} ${c.word}.` : '');
+const becauseLine = c => (!c.text ? '' : PASS.includes(c.text) ? c.text : `왜냐하면 ${c.text}`);
+function cardSpeech(c) {
+  const p = [];
+  if (c.name) p.push(`${c.name}의 마음 카드예요.`);
+  p.push(sayLine(c) || '아직 마음 색을 고르지 않았어요.');
+  const b = becauseLine(c); if (b) p.push(b + '.');
+  if (!c.photo && c.pic && PICS[c.pic]) p.push(`마음 날씨는 ${PICS[c.pic].label}.`);
+  if (c.helper) p.push(`나를 돕는 방법은 ${c.helper}.`);
+  return p.join(' ');
+}
+function stickersHTML(c) {
+  const s = c.stickers || {}, items = STICKERS.filter(k => s[k.id] > 0);
+  return items.length ? `<span class="stickers">${items.map(k => `<span class="stk"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">${k.icon}</svg>${k.label}<em>×${s[k.id]}</em></span>`).join('')}</span>` : '';
+}
+function cardHTML(c, preview) {
+  const who = c.name ? `${esc(c.name)}의 마음` : '나의 마음';
+  const friend = c.color ? friendSVG(c.color, c.word) : `<svg class="friend" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><circle cx="50" cy="50" r="34" fill="none" style="stroke:var(--ink-2)" stroke-width="3" stroke-dasharray="6 7"/></svg>`;
+  const say = c.color && c.word ? `나는 지금 <b>${esc(LEVELS[(c.level || 2) - 1])} ${esc(c.word)}</b>` : `<span class="blank">아직 마음 색을 고르지 않았어요</span>`;
+  let h = `<article class="mcard"${c.color ? ` data-mood="${c.color}"` : ''}>`;
+  h += `<div class="mcard-top"><div class="mcard-friend">${friend}</div><div><p class="mcard-name">${who}</p><p class="mcard-say">${say}</p></div></div>`;
+  if (c.photo) h += `<figure class="mcard-photo"><img src="${c.photo}" alt="${c.name ? esc(c.name) + '의 사진' : '내가 담은 사진'}"></figure>`;
+  else if (c.pic && PICS[c.pic]) h += `<figure class="mcard-photo">${picSVG(c.pic, `role="img" aria-label="마음 날씨, ${esc(PICS[c.pic].label)}"`)}</figure>`;
+  else if (preview) h += `<p class="slot">사진이나 그림이 들어갈 자리</p>`;
+  if (c.text) h += `<p class="mcard-because">${PASS.includes(c.text) ? esc(c.text) : `왜냐하면 <b>${esc(c.text)}</b>`}</p>`;
+  else if (preview) h += `<p class="slot">왜 그런 마음인지 들어갈 자리</p>`;
+  const media = [];
+  if (voices.has(c.id)) media.push(`<button class="btn sm" type="button" data-act="voice" data-id="${c.id}">목소리 듣기</button>`);
+  if (c.hits && c.hits.length && INSTS[c.inst]) media.push(`<button class="btn sm" type="button" data-act="perf" data-id="${c.id}">연주 듣기 · ${INSTS[c.inst].name}</button>`);
+  if (media.length) h += `<div class="mcard-media">${media.join('')}</div>`;
+  else if (preview) h += `<p class="slot">목소리와 연주가 들어갈 자리</p>`;
+  if (c.helper) h += `<p class="mcard-helper">나를 돕는 방법 · ${esc(c.helper)}</p>`;
+  return h + `<div class="mcard-foot"><span>${dateText(c.at)}</span>${stickersHTML(c)}</div></article>`;
+}
+const stickerButtons = () => STICKERS.map(k => `<button type="button" class="chip" data-sticker="${k.id}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${k.icon}</svg>${k.label}</button>`).join('');
+const findCard = id => (card.id === id ? card : wall.find(c => c.id === id) || SAMPLES.find(c => c.id === id) || null);
+const wordsFor = color => MOODS[color].words.slice(0, Math.max(1, S.words / 4));
+
+/* ───────── 알림, 저장 ───────── */
+let toastTimer = 0;
+function toast(msg, ms) {
+  const t = $('#toast'); t.textContent = msg; t.hidden = false;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, ms || 2800);
+  if (S.tts) Voice.say(msg);
+}
+function celebrate() {
+  if (S.motion || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
+  const b = D.createElement('div'); b.className = 'burst'; b.setAttribute('aria-hidden', 'true');
+  const cols = [HEX.yellow, HEX.green, HEX.blue, HEX.red];
+  for (let i = 0; i < 16; i++) {
+    const d = D.createElement('i'), a = i / 16 * Math.PI * 2, r = 90 + Math.random() * 90;
+    d.style.background = cols[i % 4];
+    d.style.setProperty('--dx', (Math.cos(a) * r).toFixed(0) + 'px'); d.style.setProperty('--dy', (Math.sin(a) * r).toFixed(0) + 'px');
+    b.appendChild(d);
+  }
+  D.body.appendChild(b); setTimeout(() => b.remove(), 1000);
+}
+function askIn(box, msg, yes, onYes) {
+  box.innerHTML = `<div class="confirm" role="group" aria-label="확인"><p>${esc(msg)}</p><button class="btn sm primary" type="button" data-yes>${esc(yes)}</button><button class="btn sm" type="button" data-no>그만두기</button></div>`;
+  $('[data-yes]', box).onclick = () => { box.innerHTML = ''; onYes(); };
+  $('[data-no]', box).onclick = () => { box.innerHTML = ''; };
+  $('[data-no]', box).focus();
+}
+function persist() {
+  const data = () => ({ settings: S, wall, used: usedBefore });
+  if (mem.save(data())) return true;
+  for (let i = wall.length - 1; i >= 0; i--) {
+    if (!wall[i].photo) continue;
+    wall[i].photo = null;
+    if (mem.save(data())) { toast('저장할 자리가 모자라 오래된 사진을 정리했어요'); return true; }
+  }
+  return false;
+}
+/* 붙인 카드를 고치면 우리 반 팔레트의 카드도 함께 바꿔요 */
+async function syncPosted() {
+  if (!card.posted) return;
+  const w = wall.find(c => c.id === card.id); if (!w) return;
+  ['name', 'color', 'word', 'level', 'pic', 'text', 'inst', 'hits', 'helper', 'foundColor'].forEach(k => { w[k] = card[k]; });
+  w.stickers = Object.assign({}, card.stickers);
+  if (card.photo !== card.postedPhoto) {
+    card.postedPhoto = card.photo; w.photo = null;
+    if (card.photo) { try { w.photo = await shrink(card.photo, 360, 0.72); } catch (e) {} }
+  }
+  persist();
+}
+
+/* ───────── 설정 ───────── */
+function applySettings(save) {
+  const R = D.documentElement;
+  if (S.text === 'normal') R.removeAttribute('data-text'); else R.setAttribute('data-text', S.text);
+  if (S.contrast) R.setAttribute('data-contrast', 'high'); else R.removeAttribute('data-contrast');
+  if (S.motion) R.setAttribute('data-motion', 'less'); else R.removeAttribute('data-motion');
+  app.dataset.guide = S.mode === 'free' ? 'off' : 'on';
+  app.dataset.captions = S.captions ? 'on' : 'off';
+  $$('input[name="mode"], input[name="setMode"]').forEach(i => { i.checked = i.value === S.mode; });
+  $$('input[name="setText"]').forEach(i => { i.checked = i.value === S.text; });
+  $$('input[name="setWords"]').forEach(i => { i.checked = +i.value === +S.words; });
+  $('#swContrast').checked = !!S.contrast; $('#swTts').checked = !!S.tts; $('#swCap').checked = !!S.captions;
+  $('#swSound').checked = !!S.sound; $('#swMotion').checked = !!S.motion;
+  if (!S.sound) Sound.stop();
+  if (!S.tts) Voice.stop();
+  if (save !== false) persist();
+}
+function setMode(m) {
+  S.mode = m; S.tts = m === 'listen';
+  applySettings(); renderSteps();
+  if (m === 'listen') Voice.say('듣기 모드예요. 화면을 소리로 읽어 줄게요.');
+}
+
+/* ───────── 화면 이동 ───────── */
+function stepDone(id) {
+  if (id === 'mood') return !!card.color;
+  if (id === 'photo') return !!(card.photo || card.pic);
+  if (id === 'voice') return !!(card.text || voices.has(card.id));
+  if (id === 'music') return !!(card.hits && card.hits.length);
+  if (id === 'calm') return !!(card.breath || card.helper);
+  return !!card.posted;
+}
+function renderSteps() {
+  const cur = STEPS.findIndex(s => s[0] === screen);
+  $('#steps').innerHTML = STEPS.map(([id, label, full], i) => {
+    const locked = S.mode !== 'free' && i > reached, done = stepDone(id);
+    return `<li class="${i === cur ? 'is-current ' : ''}${done ? 'is-done' : ''}"><button type="button" data-go="${id}" aria-label="${i + 1}단계, ${full}${done ? ', 했어요' : ''}"${locked ? ' disabled' : ''}${i === cur ? ' aria-current="step"' : ''}><span class="n">${i + 1}</span><span class="t">${label}</span></button></li>`;
+  }).join('');
+}
+function renderNav() {
+  const i = STEPS.findIndex(s => s[0] === screen), prev = $('#btnPrev'), next = $('#btnNext');
+  if (i < 0) { prev.hidden = true; next.hidden = true; return; }
+  prev.hidden = false; prev.textContent = i === 0 ? '처음으로' : '이전';
+  next.hidden = i === STEPS.length - 1; next.textContent = i === STEPS.length - 2 ? '카드 보기' : '다음';
+}
+function renderRail() {
+  const home = screen === 'home';
+  $('#railTitle').textContent = home ? '마음 카드' : '내 마음 카드';
+  $('#railTag').hidden = !home;
+  $('#railCard').innerHTML = home ? cardHTML(SAMPLES[0], false) : cardHTML(card, true);
+}
+function quiet() {
+  stopHunt(); Cam.stop(); shotUI(false);
+  stopVoiceDevices();
+  Shake.stop(); BodyMove.stop(); how = 'touch'; stopPerf(false); playTok++; Sound.stop();
+  stopBreath(); Blow.stop(); blowOn = false; micLevel = 0; cancelAnimationFrame(rotRaf); rotRaf = 0;
+  Voice.stop();
+}
+function go(name, first) {
+  if (!['home', 'wall', 'mood'].includes(name) && !card.color) { toast('먼저 마음 색을 골라요'); name = 'mood'; }
+  quiet(); syncPosted();
+  clearTimeout(capTimer); capEl.classList.remove('on');
+  screen = name; app.dataset.screen = name;
+  $$('.screen[id^="scr-"]').forEach(s => { s.hidden = s.id !== 'scr-' + name; });
+  const i = STEPS.findIndex(s => s[0] === name); if (i > reached) reached = i;
+  ({ mood: renderMood, photo: enterPhoto, voice: enterVoice, music: renderMusic, calm: enterCalm, card: renderCardScreen, wall: renderWall }[name] || (() => {}))();
+  renderSteps(); renderNav(); renderRail();
+  $('#stageMain').scrollTop = 0;
+  if (first) return;
+  const h = $(`#h-${name}`);
+  if (h) { h.setAttribute('tabindex', '-1'); try { h.focus({ preventScroll: true }); } catch (e) {} }
+  if (S.tts) Voice.say(SAY[name]);
+}
+const refocus = sel => { const e = $(sel); if (e) { try { e.focus({ preventScroll: true }); } catch (x) {} } };
+
+/* ───────── 1 마음 색 ───────── */
+function renderMood() {
+  $('#meter').innerHTML = MOOD_ORDER.map(k => {
+    const m = MOODS[k], on = card.color === k;
+    return `<button type="button" class="mood-tile" aria-pressed="${on}" data-color="${k}" style="--tile:var(--${k})" aria-label="${m.name}, ${m.words[0]}. ${m.desc}">${friendSVG(k, on ? card.word : m.words[0], 'bob')}<span><b>${m.words[0]}</b><small>${m.desc}</small></span></button>`;
+  }).join('');
+  const more = $('#moodMore');
+  more.hidden = !card.color;
+  if (card.color) {
+    const ws = wordsFor(card.color);
+    $('#wordBox').hidden = ws.length < 2;
+    $('#wordChips').innerHTML = ws.map(w => `<button type="button" class="chip" aria-pressed="${card.word === w}" data-word="${w}">${friendSVG(card.color, w)}${w}</button>`).join('');
+    $('#levelChips').innerHTML = LEVELS.map((l, i) => `<button type="button" class="level" aria-pressed="${card.level === i + 1}" data-level="${i + 1}" style="--lv:${i + 1}">${friendSVG(card.color, card.word)}<span>${l}</span></button>`).join('');
+  }
+  $('#moodSentence').innerHTML = card.color ? `나는 지금 <b>${LEVELS[card.level - 1]} ${card.word}</b>` : `<span class="blank">색을 고르면 여기에 내 마음 문장이 생겨요</span>`;
+}
+function pickColor(k) {
+  card.color = k;
+  if (!card.word || !wordsFor(k).includes(card.word)) card.word = MOODS[k].words[0];
+  if (card.helper && !MOODS[k].helpers.includes(card.helper)) card.helper = null;
+  if (card.text && !PASS.includes(card.text) && Object.keys(MOODS).some(m => m !== k && MOODS[m].because.includes(card.text))) card.text = '';
+  app.dataset.mood = k; Sound.setMood(k);
+}
+$('#scr-mood').addEventListener('click', e => {
+  const t = e.target.closest('[data-color],[data-word],[data-level]'); if (!t) return;
+  let sel;
+  if (t.dataset.color) { pickColor(t.dataset.color); sel = `[data-color="${t.dataset.color}"]`; }
+  else if (t.dataset.word) { card.word = t.dataset.word; sel = `[data-word="${t.dataset.word}"]`; }
+  else { card.level = +t.dataset.level; sel = `[data-level="${t.dataset.level}"]`; }
+  Sound.blip(); renderMood(); refocus('#scr-mood ' + sel); renderRail(); renderSteps();
+  if (S.tts) Voice.say((t.dataset.color ? MOODS[card.color].name + '. ' : '') + sayLine(card));
+});
+
+/* ───────── 2 마음 장면: 색 찾기 탐험, 사진, 그림 ───────── */
+let photoMethod = null, lastPhotoMethod = null, huntTimer = null, shotFacing = 'environment', camBlocked = false;
+const HOLD = 6;
+function renderPhoto() {
+  const has = !!(card.photo || card.pic);
+  $$('#photoMethods .method').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.method === photoMethod)));
+  $('#photoResult').hidden = !has || (photoMethod === 'pic' && !!card.pic);
+  if (has) {
+    $('#photoFrame').innerHTML = card.photo ? `<img src="${card.photo}" alt="내가 담은 사진">` : picSVG(card.pic, `role="img" aria-label="${esc(PICS[card.pic].label)}"`);
+    $('#photoCap').textContent = card.photo ? (card.foundColor ? `내 마음 색 ${MOODS[card.foundColor].name}을 찾았어요` : '내가 담은 장면') : `마음 날씨 · ${PICS[card.pic].label}`;
+  }
+  $('#p-hunt').hidden = photoMethod !== 'hunt';
+  $('#p-shot').hidden = photoMethod !== 'shot';
+  $('#p-pic').hidden = photoMethod !== 'pic';
+  $('#pics').innerHTML = Object.keys(PICS).map(id => `<button type="button" class="pic" aria-pressed="${card.pic === id}" data-pic="${id}">${picSVG(id)}<span>${PICS[id].label}</span></button>`).join('');
+}
+function enterPhoto() { if (!photoMethod && !(card.photo || card.pic)) photoMethod = camBlocked || !hasMedia ? 'pic' : 'hunt'; renderPhoto(); }
+function huntUI(on) {
+  $('#huntEmpty').hidden = on; $('#huntReticle').hidden = !on; $('#huntStatus').hidden = !on; $('#btnHuntSnap').hidden = !on;
+  $('#btnHunt').textContent = on ? '그만하기' : '탐험 시작';
+  $('#huntReticle').style.setProperty('--p', 0);
+}
+function shotUI(on) {
+  $('#shotEmpty').hidden = on; $('#btnShot').hidden = !on; $('#btnFlip').hidden = !on; $('#btnShotOn').hidden = on;
+  $('#shotCam').classList.toggle('mirror', on && shotFacing === 'user');
+}
+function stopHunt() { if (huntTimer) { clearInterval(huntTimer); huntTimer = null; } huntUI(false); }
+function photoFail(msg) {
+  camBlocked = true; stopHunt(); Cam.stop(); shotUI(false);
+  const n = $('#photoNote'); n.textContent = `${msg} 사진 올리기나 그림 고르기로 담을 수 있어요.`; n.hidden = false;
+  photoMethod = 'pic'; renderPhoto();
+  if (S.tts) Voice.say(n.textContent);
+}
+function setPhoto(src, found) {
+  card.photo = src; card.pic = null; card.foundColor = found || null;
+  stopHunt(); Cam.stop(); shotUI(false);
+  lastPhotoMethod = photoMethod || lastPhotoMethod; photoMethod = null;
+  renderPhoto(); renderRail(); renderSteps(); refocus('#btnPhotoClear');
+}
+async function startHunt() {
+  if (huntTimer) { stopHunt(); Cam.stop(); return; }
+  const v = $('#huntVideo');
+  try { await Cam.start(v, 'environment'); } catch (e) { photoFail(camWhy(e)); return; }
+  if (screen !== 'photo') { Cam.stop(); return; }
+  huntUI(true);
+  const cv = D.createElement('canvas'); cv.width = cv.height = 24;
+  const cx = cv.getContext('2d', { willReadFrequently: true });
+  const ret = $('#huntReticle'), want = card.color; let streak = 0;
+  $('#huntText').textContent = `${MOODS[want].name} 물건을 동그라미 안에 담아요`;
+  huntTimer = setInterval(() => {
+    if (v.readyState < 2 || !v.videoWidth) return;
+    const side = Math.min(v.videoWidth, v.videoHeight) * 0.3;
+    cx.drawImage(v, (v.videoWidth - side) / 2, (v.videoHeight - side) / 2, side, side, 0, 0, 24, 24);
+    const d = cx.getImageData(0, 0, 24, 24).data, n = d.length / 4; let r = 0, g = 0, b = 0;
+    for (let i = 0; i < d.length; i += 4) { r += d[i]; g += d[i + 1]; b += d[i + 2]; }
+    r /= n; g /= n; b /= n;
+    const seen = classifyColor(r, g, b);
+    $('#huntSwatch').style.background = `rgb(${r | 0},${g | 0},${b | 0})`;
+    streak = seen === want ? Math.min(HOLD, streak + 1) : Math.max(0, streak - 2);
+    ret.style.setProperty('--p', (streak / HOLD).toFixed(2));
+    const txt = seen === want ? `${MOODS[want].name}! 그대로 멈춰요` : MOODS[seen] ? `지금은 ${MOODS[seen].name}이에요. ${MOODS[want].name}을 찾아요` : `${MOODS[want].name} 물건을 동그라미 안에 담아요`;
+    if ($('#huntText').textContent !== txt) $('#huntText').textContent = txt;
+    if (streak >= HOLD) {
+      const shot = grabFrame(v, 900, false);
+      if (shot) { setPhoto(shot, want); Sound.blip('ok'); celebrate(); toast(`찾았다! 내 마음 색 ${MOODS[want].name}`); }
+    }
+  }, 130);
+}
+async function startShot() {
+  try { await Cam.start($('#shotVideo'), shotFacing); } catch (e) { photoFail(camWhy(e)); return; }
+  if (screen !== 'photo') { Cam.stop(); return; }
+  shotUI(true);
+}
+$('#photoMethods').addEventListener('click', e => {
+  const b = e.target.closest('.method'); if (!b) return;
+  stopHunt(); Cam.stop(); shotUI(false);
+  photoMethod = b.dataset.method;
+  renderPhoto();
+});
+$('#btnHunt').addEventListener('click', startHunt);
+$('#btnHuntSnap').addEventListener('click', () => { const s = grabFrame($('#huntVideo'), 900, false); if (s) { setPhoto(s, null); Sound.blip(); } });
+$('#btnShotOn').addEventListener('click', startShot);
+$('#btnFlip').addEventListener('click', () => { shotFacing = shotFacing === 'user' ? 'environment' : 'user'; startShot(); });
+$('#btnShot').addEventListener('click', () => { const s = grabFrame($('#shotVideo'), 900, shotFacing === 'user'); if (s) { setPhoto(s, null); Sound.blip(); } });
+$('#inFile').addEventListener('change', async e => {
+  const f = e.target.files && e.target.files[0]; e.target.value = '';
+  if (!f) return;
+  if (!/^image\//.test(f.type)) { toast('사진 파일을 골라 주세요'); return; }
+  try { setPhoto(await shrink(await readFile(f), 900, 0.82), null); Sound.blip(); } catch (x) { toast('이 사진은 열 수 없어요. 다른 사진을 골라 주세요'); }
+});
+$('#pics').addEventListener('click', e => {
+  const b = e.target.closest('[data-pic]'); if (!b) return;
+  card.pic = b.dataset.pic; card.photo = null; card.foundColor = null;
+  Sound.blip(); renderPhoto(); refocus(`#pics [data-pic="${card.pic}"]`); renderRail(); renderSteps();
+  if (S.tts) Voice.say(`마음 날씨, ${PICS[card.pic].label}`);
+});
+$('#btnPhotoClear').addEventListener('click', () => {
+  card.photo = null; card.pic = null; card.foundColor = null;
+  if (!photoMethod) photoMethod = lastPhotoMethod || (camBlocked || !hasMedia ? 'pic' : 'hunt');
+  renderPhoto(); renderRail(); renderSteps(); refocus(`#photoMethods [data-method="${photoMethod}"]`);
+});
+
+/* ───────── 3 마음 말: 말하기(글자로), 목소리 담기, 문장 고르기, 쓰기 ───────── */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+const canRec = hasMedia && 'MediaRecorder' in window;
+let voiceMethod = null, sr = null, mr = null, recStream = null, recTimer = 0, micBlocked = false, player = null;
+function renderVoice() {
+  $$('#voiceMethods .method').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.method === voiceMethod)));
+  $('#p-stt').hidden = voiceMethod !== 'stt'; $('#p-rec').hidden = voiceMethod !== 'rec'; $('#p-pick').hidden = voiceMethod !== 'pick';
+  const list = (card.color ? MOODS[card.color].because : []).concat(PASS);
+  $('#becauseChips').innerHTML = list.map(t => `<button type="button" class="chip plain" aria-pressed="${card.text === t}" data-because="${esc(t)}">${esc(t)}</button>`).join('');
+  if ($('#inBecause').value !== (card.text || '')) $('#inBecause').value = card.text || '';
+  const has = voices.has(card.id);
+  $('#btnRecPlay').hidden = !has; $('#btnRecDel').hidden = !has;
+  if (!mr) $('#recState').textContent = has ? '목소리를 담았어요' : '단추를 누르면 10초까지 담아요';
+}
+function enterVoice() { if (!voiceMethod) voiceMethod = SR && !micBlocked ? 'stt' : 'pick'; renderVoice(); }
+function stopRecStream() { if (recStream) { recStream.getTracks().forEach(t => t.stop()); recStream = null; } }
+function stopVoiceDevices() {
+  if (sr) { const r = sr; sr = null; try { r.onend = r.onerror = r.onresult = r.onstart = null; r.abort(); } catch (e) {} }
+  $('#btnStt').setAttribute('aria-pressed', 'false'); $('#btnStt').setAttribute('aria-label', '말하기 시작');
+  clearInterval(recTimer); recTimer = 0;
+  if (mr) { const m = mr; mr = null; try { m.ondataavailable = m.onstop = null; if (m.state !== 'inactive') m.stop(); } catch (e) {} }
+  stopRecStream();
+  $('#btnRec').setAttribute('aria-pressed', 'false'); $('#btnRec').setAttribute('aria-label', '목소리 담기 시작');
+  $('#recBar').style.setProperty('--v', 0);
+  if (player) { try { player.pause(); } catch (e) {} player = null; }
+}
+function voiceFail(msg) {
+  micBlocked = true; stopVoiceDevices();
+  const n = $('#voiceNote'); n.textContent = `${msg} 문장을 고르거나 아래 칸에 써서 말할 수 있어요.`; n.hidden = false;
+  voiceMethod = 'pick'; renderVoice();
+  if (S.tts) Voice.say(n.textContent);
+}
+function afterVoice() { renderRail(); renderSteps(); }
+function startStt() {
+  if (sr) { try { sr.stop(); } catch (e) {} return; }
+  if (!SR) { voiceFail('이 브라우저는 말을 글자로 바꾸지 못해요.'); return; }
+  let finalText = '', r;
+  try { r = new SR(); } catch (e) { voiceFail('말하기를 시작하지 못했어요.'); return; }
+  sr = r; r.lang = 'ko-KR'; r.interimResults = true; r.continuous = false; r.maxAlternatives = 1;
+  $('#sttLive').textContent = ''; $('#sttState').textContent = '마이크를 켜고 있어요';
+  let started = false;
+  r.onstart = () => { started = true; $('#btnStt').setAttribute('aria-pressed', 'true'); $('#btnStt').setAttribute('aria-label', '말하기 그만하기'); $('#sttState').textContent = '듣고 있어요. “왜냐하면…” 하고 말해요'; };
+  r.onresult = e => {
+    let inter = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) { const x = e.results[i]; if (x.isFinal) finalText += x[0].transcript; else inter += x[0].transcript; }
+    $('#sttLive').textContent = (finalText + inter).trim();
+  };
+  r.onerror = e => {
+    const c = e.error;
+    if (c === 'no-speech') $('#sttState').textContent = '소리가 들리지 않았어요. 다시 눌러 말해요';
+    else if (c === 'aborted') return;
+    else if (c === 'not-allowed' || c === 'service-not-allowed' || c === 'audio-capture') voiceFail('마이크를 쓸 수 없어요.');
+    else if (c === 'network') voiceFail('말을 글자로 바꾸려면 인터넷이 필요해요.');
+    else voiceFail('말을 알아듣지 못했어요.');
+  };
+  r.onend = () => {
+    if (sr !== r) return;
+    sr = null;
+    $('#btnStt').setAttribute('aria-pressed', 'false'); $('#btnStt').setAttribute('aria-label', '말하기 시작');
+    const t = (finalText || $('#sttLive').textContent || '').trim();
+    if (t) { card.text = t.slice(0, 60); $('#sttState').textContent = '글자로 바꿨어요. 아래 칸에서 고칠 수 있어요'; renderVoice(); afterVoice(); Sound.blip('ok'); }
+    else if (!/들리지/.test($('#sttState').textContent)) $('#sttState').textContent = '단추를 누르고 말해요';
+  };
+  try { r.start(); } catch (e) { sr = null; voiceFail('말하기를 시작하지 못했어요.'); return; }
+  // 권한은 이미 있는데도 5초 동안 시작되지 않으면 이 브라우저에서는 쓸 수 없는 것으로 봐요
+  const watch = () => setTimeout(() => { if (sr === r && !started) voiceFail('말을 글자로 바꾸지 못했어요.'); }, 5000);
+  try { navigator.permissions.query({ name: 'microphone' }).then(p => { if (p.state === 'granted') watch(); }).catch(() => {}); } catch (e) {}
+}
+async function startRec() {
+  if (mr) { stopRec(); return; }
+  if (!canRec) { voiceFail('이 화면에서는 목소리를 담을 수 없어요.'); return; }
+  let s;
+  try { s = await navigator.mediaDevices.getUserMedia({ audio: true, video: false }); } catch (e) { voiceFail(micWhy(e)); return; }
+  if (screen !== 'voice') { s.getTracks().forEach(t => t.stop()); return; }
+  recStream = s;
+  const chunks = []; let m;
+  try { m = new MediaRecorder(s); } catch (e) { stopRecStream(); voiceFail('목소리를 담지 못했어요.'); return; }
+  mr = m; const id = card.id;
+  m.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
+  m.onstop = () => {
+    clearInterval(recTimer); recTimer = 0; mr = null; stopRecStream();
+    $('#btnRec').setAttribute('aria-pressed', 'false'); $('#btnRec').setAttribute('aria-label', '목소리 담기 시작'); $('#recBar').style.setProperty('--v', 0);
+    const blob = new Blob(chunks, { type: m.mimeType || 'audio/webm' });
+    if (blob.size > 200) { const old = voices.get(id); if (old) URL.revokeObjectURL(old); voices.set(id, URL.createObjectURL(blob)); Sound.blip('ok'); }
+    renderVoice(); afterVoice();
+  };
+  m.start();
+  const t0 = performance.now();
+  $('#btnRec').setAttribute('aria-pressed', 'true'); $('#btnRec').setAttribute('aria-label', '목소리 담기 그만하기'); $('#recState').textContent = '담고 있어요. 다시 누르면 멈춰요';
+  recTimer = setInterval(() => { const v = (performance.now() - t0) / 10000; $('#recBar').style.setProperty('--v', clamp(v, 0, 1).toFixed(3)); if (v >= 1) stopRec(); }, 100);
+}
+function stopRec() { if (mr && mr.state !== 'inactive') { try { mr.stop(); } catch (e) {} } }
+function playVoice(id) {
+  const url = voices.get(id); if (!url) return;
+  if (player) { try { player.pause(); } catch (e) {} }
+  player = new Audio(url); player.play().catch(() => toast('목소리를 들려주지 못했어요'));
+  soundCaption('♪ 담아 둔 목소리가 나와요');
+}
+$('#voiceMethods').addEventListener('click', e => { const b = e.target.closest('.method'); if (!b || b.disabled) return; stopVoiceDevices(); voiceMethod = b.dataset.method; renderVoice(); });
+$('#btnStt').addEventListener('click', startStt);
+$('#btnRec').addEventListener('click', startRec);
+$('#btnRecPlay').addEventListener('click', () => playVoice(card.id));
+$('#btnRecDel').addEventListener('click', () => { const u = voices.get(card.id); if (u) URL.revokeObjectURL(u); voices.delete(card.id); renderVoice(); afterVoice(); refocus('#btnRec'); });
+$('#becauseChips').addEventListener('click', e => {
+  const b = e.target.closest('[data-because]'); if (!b) return;
+  card.text = card.text === b.dataset.because ? '' : b.dataset.because;
+  Sound.blip(); renderVoice(); refocus(`#becauseChips [data-because="${CSS.escape(b.dataset.because)}"]`); afterVoice();
+  if (S.tts && card.text) Voice.say(becauseLine(card));
+});
+$('#inBecause').addEventListener('input', e => { card.text = e.target.value.trim().slice(0, 60); $$('#becauseChips .chip').forEach(c => c.setAttribute('aria-pressed', String(c.dataset.because === card.text))); afterVoice(); });
+
+/* ───────── 4 마음 소리: 악기 연주(누르기, 흔들기, 몸 움직이기) ───────── */
+let how = 'touch', perf = null, perfTimer = 0, playTok = 0, wasBgm = false, lastBoom = 0, padDown = false, lastXY = null, lastMoveHit = 0;
+const pad = $('#pad');
+function renderMusic() {
+  $('#instRow').innerHTML = Object.keys(INSTS).map(id => `<button type="button" class="inst-btn" aria-pressed="${card.inst === id}" data-inst="${id}">${instSVG(id, 'inst-ic')}<span>${INSTS[id].name}</span></button>`).join('');
+  $('#padInst').innerHTML = instSVG(card.inst);
+  $('#padTip').textContent = how === 'shake' ? '기기를 흔들어 연주해요' : how === 'body' ? '카메라 앞에서 몸을 움직여요' : `여기를 눌러요 · ${INSTS[card.inst].tip}`;
+  $$('#howRow .method').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.method === how)));
+  $('#padCam').hidden = how !== 'body'; $('#padLevel').hidden = how !== 'body';
+  const on = Sound.playing && !perf;
+  $('#btnBgm').setAttribute('aria-pressed', String(on)); $('#btnBgm').textContent = on ? '감정 음악 끄기' : '감정 음악 켜기';
+  $('#btnBgm').disabled = !!perf;
+  $('#btnPerf').textContent = perf ? '그만 담기' : '연주 담기 (10초)';
+  $('#btnPerfPlay').hidden = !(card.hits && card.hits.length) || !!perf;
+}
+function strike(s, x, y) {
+  if (screen !== 'music') return;
+  const r = pad.getBoundingClientRect(), inst = INSTS[card.inst];
+  if (x == null) { x = r.width * (0.3 + Math.random() * 0.4); y = r.height * (0.3 + Math.random() * 0.4); }
+  Sound.hit(card.inst, s);
+  const rp = D.createElement('span'); rp.className = 'ripple'; rp.style.left = x + 'px'; rp.style.top = y + 'px'; rp.style.setProperty('--s', s.toFixed(2));
+  pad.appendChild(rp); setTimeout(() => rp.remove(), 800);
+  const now = performance.now();
+  if (now - lastBoom > 420) {
+    lastBoom = now;
+    const w = D.createElement('span'); w.className = 'boom'; w.textContent = inst.sound;
+    w.style.left = clamp(x - 30, 8, Math.max(8, r.width - 120)) + 'px'; w.style.top = clamp(y - 46, 14, Math.max(14, r.height - 44)) + 'px';
+    pad.appendChild(w); setTimeout(() => w.remove(), 950);
+  }
+  pad.classList.remove('hit'); void pad.offsetWidth; pad.classList.add('hit');
+  soundCaption(`♪ ${inst.name} · ${inst.sound}`);
+  if (navigator.vibrate) { try { navigator.vibrate(12); } catch (e) {} }
+  if (perf) { const t = now - perf.t0; if (t <= 10000 && perf.hits.length < 160) perf.hits.push({ t: Math.round(t), s: +s.toFixed(2) }); }
+}
+pad.addEventListener('pointerdown', e => {
+  padDown = true; lastXY = [e.clientX, e.clientY];
+  try { pad.setPointerCapture(e.pointerId); } catch (x) {}
+  const r = pad.getBoundingClientRect();
+  strike(e.pointerType === 'pen' && e.pressure ? clamp(e.pressure * 1.4, 0.3, 1) : 0.75, e.clientX - r.left, e.clientY - r.top);
+});
+pad.addEventListener('pointermove', e => {
+  if (!padDown || !lastXY || (card.inst !== 'rain' && card.inst !== 'chime')) return;
+  const now = performance.now(), dist = Math.hypot(e.clientX - lastXY[0], e.clientY - lastXY[1]);
+  if (dist > 28 && now - lastMoveHit > 120) {
+    lastMoveHit = now; lastXY = [e.clientX, e.clientY];
+    const r = pad.getBoundingClientRect(); strike(clamp(dist / 120, 0.3, 1), e.clientX - r.left, e.clientY - r.top);
+  }
+});
+['pointerup', 'pointercancel', 'pointerleave'].forEach(n => pad.addEventListener(n, () => { padDown = false; }));
+pad.addEventListener('keydown', e => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); if (!e.repeat) strike(0.75); } });
+function musicFail(msg) { const n = $('#musicNote'); n.textContent = `${msg} 화면 누르기로 연주할 수 있어요.`; n.hidden = false; if (S.tts) Voice.say(n.textContent); }
+async function setHow(m) {
+  Shake.stop(); BodyMove.stop(); how = 'touch'; $('#musicNote').hidden = true;
+  if (m === 'shake') {
+    $('#padTip').textContent = '흔들기를 확인하고 있어요. 기기를 살짝 흔들어 봐요';
+    try { await Shake.start(s => strike(s)); how = 'shake'; }
+    catch (e) { musicFail(e && e.message === 'denied' ? '흔들기 권한이 꺼져 있어요.' : '이 기기는 흔들기를 느끼지 못해요.'); }
+  } else if (m === 'body') {
+    try { await BodyMove.start($('#bodyVideo'), s => strike(s), v => $('#padLevel').style.setProperty('--v', v.toFixed(2))); how = 'body'; }
+    catch (e) { musicFail(camWhy(e)); }
+  }
+  if (screen !== 'music') { Shake.stop(); BodyMove.stop(); how = 'touch'; return; }
+  renderMusic();
+}
+function toggleBgm() {
+  if (Sound.playing) Sound.stop();
+  else if (Sound.music(card.color)) soundCaption(`♪ ${MOODS[card.color].name} 마음 음악이 흘러요`);
+  else toast(S.sound ? '이 기기에서는 소리를 낼 수 없어요' : '보기 설정에서 소리를 켜면 들을 수 있어요');
+  renderMusic();
+}
+function stopPerf(keep) {
+  clearInterval(perfTimer); perfTimer = 0; $('#perfBar').style.setProperty('--v', 0);
+  const p = perf; perf = null; if (!p) return;
+  if (!wasBgm) Sound.stop();
+  if (keep) {
+    if (p.hits.length) { card.hits = p.hits; Sound.blip('ok'); toast('연주를 담았어요'); }
+    else toast('연주가 담기지 않았어요. 다시 해 볼까요?');
+    renderMusic(); renderRail(); renderSteps();
+  }
+}
+function startPerf() {
+  if (perf) { stopPerf(true); return; }
+  playTok++; wasBgm = Sound.playing;
+  if (!wasBgm) Sound.music(card.color);
+  perf = { t0: performance.now(), hits: [] };
+  caption('10초 동안 마음껏 연주해요. 연주를 담고 있어요', 2600);
+  perfTimer = setInterval(() => { if (!perf) return; const v = (performance.now() - perf.t0) / 10000; $('#perfBar').style.setProperty('--v', clamp(v, 0, 1).toFixed(3)); if (v >= 1) stopPerf(true); }, 80);
+  renderMusic();
+}
+function playPerf(c) {
+  if (!c || !c.hits || !c.hits.length) return;
+  stopPerf(false); const tok = ++playTok;
+  if (!S.sound) { toast('보기 설정에서 소리를 켜면 들을 수 있어요'); return; }
+  Sound.setMood(c.color); Sound.music(c.color);
+  const inst = INSTS[c.inst] || INSTS.rain;
+  soundCaption(`♪ ${c.name ? c.name + '의' : '내'} 연주 · ${inst.name}`);
+  c.hits.forEach(h => setTimeout(() => {
+    if (tok !== playTok) return;
+    if (screen === 'music' && c === card) strike(h.s); else { Sound.hit(c.inst, h.s); soundCaption(`♪ ${inst.name} · ${inst.sound}`); }
+  }, h.t));
+  const end = Math.min(10400, c.hits[c.hits.length - 1].t + 2600);
+  setTimeout(() => { if (tok !== playTok) return; Sound.stop(); if (card.color) Sound.setMood(card.color); if (screen === 'music') renderMusic(); }, end);
+  if (screen === 'music') renderMusic();
+}
+$('#instRow').addEventListener('click', e => {
+  const b = e.target.closest('[data-inst]'); if (!b) return;
+  card.inst = b.dataset.inst; if (!perf) card.hits = null;
+  renderMusic(); refocus(`#instRow [data-inst="${card.inst}"]`); renderRail(); renderSteps();
+  Sound.hit(card.inst, 0.6); soundCaption(`♪ ${INSTS[card.inst].name} · ${INSTS[card.inst].sound}`);
+});
+$('#howRow').addEventListener('click', e => { const b = e.target.closest('.method'); if (!b || b.disabled) return; setHow(b.dataset.method); });
+$('#btnBgm').addEventListener('click', toggleBgm);
+$('#btnPerf').addEventListener('click', startPerf);
+$('#btnPerfPlay').addEventListener('click', () => playPerf(card));
+
+/* ───────── 5 숨 고르기와 나를 돕는 방법 ───────── */
+let breathTok = 0, breathing = false, phase = '', blowOn = false, micLevel = 0, rot = 0, spin = 0, rotRaf = 0;
+function renderCalm() {
+  $('#breathCircle').innerHTML = card.color ? friendSVG(card.color, '편안해요') : '';
+  $$('#breathDots i').forEach(d => d.classList.toggle('on', !!card.breath && !breathing));
+  $('#btnBreath').textContent = breathing ? '그만하기' : card.breath ? '한 번 더 하기' : '숨쉬기 시작';
+  $('#btnBlow').setAttribute('aria-pressed', String(blowOn));
+  const hs = card.color ? MOODS[card.color].helpers : [];
+  $('#helperChips').innerHTML = hs.map(t => `<button type="button" class="chip plain" aria-pressed="${card.helper === t}" data-helper="${esc(t)}">${esc(t)}</button>`).join('');
+}
+function enterCalm() {
+  renderCalm();
+  $('#breathLabel').textContent = card.breath ? '숨을 고르니 어떤가요?' : '세 번만 함께 숨 쉬어요';
+  const pw = $('#pinwheel');
+  const loop = () => {
+    const target = blowOn ? micLevel * 16 : phase === 'out' ? 6 : 0;
+    spin += (target - spin) * 0.06;
+    if (!S.motion && spin > 0.05) { rot = (rot + spin) % 360; pw.style.setProperty('--rot', rot.toFixed(1) + 'deg'); }
+    rotRaf = requestAnimationFrame(loop);
+  };
+  cancelAnimationFrame(rotRaf); rotRaf = requestAnimationFrame(loop);
+}
+function stopBreath() {
+  breathTok++; breathing = false; phase = '';
+  $('#breathCircle').classList.remove('in');
+  $('#btnBreath').textContent = card.breath ? '한 번 더 하기' : '숨쉬기 시작';
+}
+async function runBreath() {
+  if (breathing) { stopBreath(); $('#breathLabel').textContent = '세 번만 함께 숨 쉬어요'; return; }
+  const tok = ++breathTok, c = $('#breathCircle'), lab = $('#breathLabel'), dots = $$('#breathDots i');
+  breathing = true; $('#btnBreath').textContent = '그만하기'; dots.forEach(d => d.classList.remove('on'));
+  for (let i = 0; i < 3; i++) {
+    phase = 'in'; c.classList.add('in'); lab.textContent = '코로 천천히 들이쉬어요'; Sound.blip('in');
+    if (S.tts) Voice.say('들이쉬어요'); else caption('들이쉬어요', 3600);
+    await wait(4000); if (tok !== breathTok) return;
+    phase = 'out'; c.classList.remove('in'); lab.textContent = '입으로 후— 내쉬어요'; Sound.blip('out');
+    if (S.tts) Voice.say('내쉬어요'); else caption('후— 내쉬어요', 3600);
+    await wait(4000); if (tok !== breathTok) return;
+    dots[i].classList.add('on');
+  }
+  breathing = false; phase = ''; card.breath = true;
+  lab.textContent = '잘했어요. 숨을 고르니 어떤가요?'; Sound.blip('ok');
+  $('#btnBreath').textContent = '한 번 더 하기'; renderSteps(); renderRail();
+  if (S.tts) Voice.say('잘했어요. 이제 나를 돕는 방법을 하나 골라요.');
+}
+async function toggleBlow() {
+  const n = $('#calmNote');
+  if (blowOn) { Blow.stop(); blowOn = false; micLevel = 0; }
+  else {
+    try { await Blow.start(v => { micLevel = v; }); if (screen !== 'calm') { Blow.stop(); return; } blowOn = true; n.hidden = true; caption('마이크에 대고 후— 불어 봐요', 3200); }
+    catch (e) { n.textContent = `${micWhy(e)} 숨쉬기를 시작하면 내쉴 때 바람개비가 함께 돌아요.`; n.hidden = false; if (S.tts) Voice.say(n.textContent); }
+  }
+  $('#btnBlow').setAttribute('aria-pressed', String(blowOn));
+}
+$('#btnBreath').addEventListener('click', runBreath);
+$('#btnBlow').addEventListener('click', toggleBlow);
+$('#helperChips').addEventListener('click', e => {
+  const b = e.target.closest('[data-helper]'); if (!b) return;
+  card.helper = card.helper === b.dataset.helper ? null : b.dataset.helper;
+  Sound.blip(); renderCalm(); refocus(`#helperChips [data-helper="${CSS.escape(b.dataset.helper)}"]`); renderRail(); renderSteps();
+  if (S.tts && card.helper) Voice.say(`나를 돕는 방법, ${card.helper}`);
+});
+
+/* ───────── 6 마음 카드: 읽어 주기, 응원, 붙이기, 그림으로 저장 ───────── */
+function renderCardScreen() {
+  $('#bigCard').innerHTML = cardHTML(card, false);
+  $('#cheerChips').innerHTML = stickerButtons();
+  const p = $('#btnPost'); p.disabled = !!card.posted; p.textContent = card.posted ? '우리 반 팔레트에 붙였어요' : '우리 반 팔레트에 붙이기';
+  $('#postNote').textContent = card.posted ? '붙였어요. 위쪽 ‘우리 반’에서 친구들 카드와 함께 볼 수 있어요.' : '붙인 카드는 이 기기의 ‘우리 반’에 모여요.';
+  $('#newConfirm').innerHTML = '';
+}
+function addSticker(c, id) {
+  if (!c) return;
+  c.stickers = c.stickers || {}; c.stickers[id] = (c.stickers[id] || 0) + 1;
+  const k = STICKERS.find(s => s.id === id);
+  Sound.blip(); soundCaption(`응원 스티커 · ${k.label}`);
+  if (c === card) syncPosted(); else if (wall.includes(c)) persist();
+}
+async function postCard() {
+  if (card.posted || !card.color) return;
+  const copy = { id: card.id, name: card.name, color: card.color, word: card.word, level: card.level, photo: null, foundColor: card.foundColor, pic: card.pic, text: card.text, inst: card.inst, hits: card.hits, helper: card.helper, stickers: Object.assign({}, card.stickers), at: card.at };
+  $('#btnPost').disabled = true;
+  if (card.photo) { try { copy.photo = await shrink(card.photo, 360, 0.72); } catch (e) {} }
+  card.postedPhoto = card.photo;
+  wall.unshift(copy); if (wall.length > 40) wall.length = 40;
+  usedBefore = true; card.posted = true; persist();
+  Sound.blip('ok'); celebrate(); toast('우리 반 팔레트에 붙였어요');
+  renderCardScreen(); renderSteps();
+}
+function rr(x, X, Y, W, H, R) { x.beginPath(); x.moveTo(X + R, Y); x.arcTo(X + W, Y, X + W, Y + H, R); x.arcTo(X + W, Y + H, X, Y + H, R); x.arcTo(X, Y + H, X, Y, R); x.arcTo(X, Y, X + W, Y, R); x.closePath(); }
+function wrapText(x, text, X, Y, maxW, lh) {
+  let line = '';
+  for (const w of String(text).split(' ')) {
+    const test = line ? line + ' ' + w : w;
+    if (line && x.measureText(test).width > maxW) { x.fillText(line, X, Y); Y += lh; line = w; } else line = test;
+  }
+  if (line) { x.fillText(line, X, Y); Y += lh; }
+  return Y;
+}
+const svgURL = s => 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(s);
+async function cardImage(c) {
+  const FD = `'Jua', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif`, FB = `'Gowun Dodum', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif`;
+  try { if (D.fonts && D.fonts.load) await Promise.all([D.fonts.load('54px Jua', '가'), D.fonts.load('36px "Gowun Dodum"', '가')]); } catch (e) {}
+  const hasPic = !!(c.photo || (c.pic && PICS[c.pic])), W = 900, H = hasPic ? 1240 : 700;
+  const cv = D.createElement('canvas'); cv.width = W; cv.height = H;
+  const x = cv.getContext('2d');
+  x.fillStyle = '#ECEBFA'; x.fillRect(0, 0, W, H);
+  rr(x, 28, 28, W - 56, H - 56, 52); x.fillStyle = SOFT[c.color] || '#F4F3FD'; x.fill(); x.lineWidth = 8; x.strokeStyle = INK; x.stroke();
+  x.beginPath(); x.arc(160, 168, 84, 0, Math.PI * 2); x.fillStyle = '#FFFFFF'; x.fill(); x.lineWidth = 5; x.stroke();
+  if (c.color) { try { x.drawImage(await loadImg(svgURL(friendFile(c.color, c.word))), 94, 102, 132, 132); } catch (e) {} }
+  x.textBaseline = 'alphabetic'; x.fillStyle = '#57567A'; x.font = `30px ${FB}`;
+  x.fillText(c.name ? `${c.name}의 마음` : '나의 마음', 276, 128);
+  x.fillStyle = INK; x.font = `54px ${FD}`;
+  let y = Math.max(wrapText(x, sayLine(c), 276, 196, W - 276 - 64, 66), 290);
+  if (hasPic) {
+    const pw = W - 152, ph = pw * 0.75;
+    try {
+      const im = await loadImg(c.photo || svgURL(picFile(c.pic))), k = Math.max(pw / im.width, ph / im.height), dw = im.width * k, dh = im.height * k;
+      x.save(); rr(x, 76, y, pw, ph, 32); x.clip(); x.drawImage(im, 76 + (pw - dw) / 2, y + (ph - dh) / 2, dw, dh); x.restore();
+    } catch (e) {}
+    rr(x, 76, y, pw, ph, 32); x.lineWidth = 6; x.strokeStyle = INK; x.stroke();
+    y += ph + 70;
+  } else y += 40;
+  x.fillStyle = INK; x.font = `38px ${FB}`;
+  const b = becauseLine(c); if (b) y = wrapText(x, b + '.', 76, y, W - 152, 54) + 8;
+  if (c.helper) { x.font = `32px ${FB}`; x.fillStyle = '#57567A'; wrapText(x, `나를 돕는 방법 · ${c.helper}`, 76, y + 4, W - 152, 46); }
+  x.font = `26px ${FB}`; x.fillStyle = '#57567A'; x.fillText(`${dateText(c.at)} · 마음 팔레트`, 76, H - 72);
+  const st = STICKERS.filter(k => (c.stickers || {})[k.id] > 0).map(k => `${k.label} ×${c.stickers[k.id]}`).join('   ');
+  if (st) { x.textAlign = 'right'; x.fillText(st, W - 76, H - 72); x.textAlign = 'left'; }
+  return new Promise((res, rej) => cv.toBlob(bl => (bl ? res(bl) : rej(new Error('blob'))), 'image/png'));
+}
+const hosted = !!(window.claude && typeof window.claude.use === 'function');
+let DL = null;
+if (hosted) { window.claude.use('downloads').then(d => { DL = d; if (!d) $('#btnSave').hidden = true; }).catch(() => { $('#btnSave').hidden = true; }); }
+async function saveCard() {
+  const b = $('#btnSave'); b.disabled = true;
+  try {
+    const blob = await cardImage(card), name = `마음카드${card.name ? '-' + card.name : ''}.png`;
+    if (hosted) {
+      const dl = DL || await window.claude.use('downloads');
+      if (!dl) { b.hidden = true; toast('이 화면에서는 그림으로 저장할 수 없어요'); return; }
+      try { await dl.save({ filename: name, data: blob }); toast('그림으로 저장했어요'); }
+      catch (e) {
+        const code = e && e.code;
+        if (code === 'declined') toast('저장하지 않았어요');
+        else if (code === 'rate_limited') toast('잠시 뒤에 다시 눌러 주세요');
+        else { b.hidden = true; toast('이 화면에서는 그림으로 저장할 수 없어요'); }
+      }
+    } else {
+      const url = URL.createObjectURL(blob), a = D.createElement('a');
+      a.href = url; a.download = name; D.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 5000); toast('그림 파일로 내려받아요');
+    }
+  } catch (e) { toast('그림을 만들지 못했어요'); }
+  finally { b.disabled = false; }
+}
+function startNew() {
+  quiet();
+  const u = voices.get(card.id); if (u && !card.posted) { URL.revokeObjectURL(u); voices.delete(card.id); }
+  card = newCard(''); reached = 0; photoMethod = null; voiceMethod = null;
+  app.removeAttribute('data-mood'); $('#inName').value = '';
+  ['#photoNote', '#voiceNote', '#musicNote', '#calmNote'].forEach(s => { $(s).hidden = true; });
+  go('home');
+}
+$('#btnRead').addEventListener('click', () => Voice.say(cardSpeech(card)));
+$('#btnShow').addEventListener('click', () => openCardDlg(card.id));
+$('#cheerChips').addEventListener('click', e => { const b = e.target.closest('[data-sticker]'); if (!b) return; addSticker(card, b.dataset.sticker); $('#bigCard').innerHTML = cardHTML(card, false); addPop($('#bigCard'), b.dataset.sticker); });
+$('#btnPost').addEventListener('click', postCard);
+$('#btnSave').addEventListener('click', saveCard);
+$('#btnNew').addEventListener('click', () => { if (card.posted) startNew(); else askIn($('#newConfirm'), '이 카드는 아직 붙이지 않았어요. 새 카드를 만들면 사라져요.', '새로 만들기', startNew); });
+function addPop(box, id) { const k = STICKERS.find(s => s.id === id), e = $$('.stk', box).find(el => el.textContent.indexOf(k.label) === 0); if (e) e.classList.add('pop'); }
+
+/* ───────── 우리 반 팔레트 ───────── */
+function renderWall() {
+  const sample = !wall.length && !usedBefore, list = wall.length ? wall : sample ? SAMPLES : [];
+  const counts = {}; CHART_ORDER.forEach(k => { counts[k] = 0; });
+  list.forEach(c => { if (counts[c.color] != null) counts[c.color]++; });
+  const total = list.length, max = Math.max(1, ...CHART_ORDER.map(k => counts[k]));
+  $('#weather').innerHTML = `<h3>오늘 우리 반 마음 색${sample ? ' <span class="tag">예시</span>' : ''}</h3>` + (total
+    ? `<div class="w-rows" role="list">${CHART_ORDER.map(k => {
+      const n = counts[k], pct = Math.round(n / total * 100);
+      return `<div class="w-row" role="listitem" tabindex="0" aria-label="${MOODS[k].name} ${n}명, ${pct}퍼센트">${friendSVG(k, MOODS[k].words[0])}<span class="w-name">${MOODS[k].name}</span><span class="w-track"><span class="w-bar" style="--v:${(n / max).toFixed(3)};--mk:var(--m-${k})"></span></span><span class="w-count">${n}명</span><span class="w-tip">${MOODS[k].name} ${n}명 · ${pct}%</span></div>`;
+    }).join('')}</div><p class="note">모두 ${total}명의 마음이 모였어요.</p>`
+    : `<p class="note">아직 모인 마음이 없어요.</p>`);
+  $('#wallGrid').innerHTML = list.length ? list.map(c => `<button type="button" class="mini" data-mood="${c.color}" data-open="${c.id}" aria-label="${esc(c.name || '친구')}의 마음 카드, ${esc(c.word)}">${c.sample ? '<span class="tag">예시</span>' : ''}<span class="mini-top">${friendSVG(c.color, c.word)}<span><span class="mini-word">${esc(c.word)}</span><span class="mini-name">${esc(c.name || '이름 없음')}</span></span></span>${c.photo ? `<span class="mini-thumb"><img src="${c.photo}" alt=""></span>` : c.pic && PICS[c.pic] ? `<span class="mini-thumb">${picSVG(c.pic)}</span>` : ''}</button>`).join('') : `<p class="empty">아직 붙인 카드가 없어요. 첫 카드를 만들어 붙여 봐요.</p>`;
+}
+let dlgId = null;
+function renderDlg() {
+  const c = findCard(dlgId); if (!c) return;
+  const d = $('#dlgCard'); if (c.color) d.dataset.mood = c.color; else d.removeAttribute('data-mood');
+  $('#h-dlgcard').textContent = `${c.name ? c.name + '의 ' : ''}마음 카드${c.sample ? ' (예시)' : ''}`;
+  $('#dlgCardBody').innerHTML = cardHTML(c, false);
+  $('#dlgCheer').innerHTML = stickerButtons();
+  $('#btnDlgRemove').hidden = !wall.includes(c);
+  $('#dlgConfirm').innerHTML = '';
+}
+function openCardDlg(id) { if (!findCard(id)) return; dlgId = id; renderDlg(); const d = $('#dlgCard'); if (!d.open) d.showModal(); }
+$('#wallGrid').addEventListener('click', e => { const b = e.target.closest('[data-open]'); if (b) openCardDlg(b.dataset.open); });
+$('#dlgCheer').addEventListener('click', e => {
+  const b = e.target.closest('[data-sticker]'); if (!b) return;
+  const c = findCard(dlgId); addSticker(c, b.dataset.sticker);
+  $('#dlgCardBody').innerHTML = cardHTML(c, false); addPop($('#dlgCardBody'), b.dataset.sticker);
+  if (screen === 'card') $('#bigCard').innerHTML = cardHTML(card, false);
+});
+$('#btnDlgRead').addEventListener('click', () => Voice.say(cardSpeech(findCard(dlgId))));
+$('#btnDlgRemove').addEventListener('click', () => askIn($('#dlgConfirm'), '이 카드를 우리 반 팔레트에서 뗄까요?', '카드 떼기', () => {
+  wall = wall.filter(c => c.id !== dlgId); if (card.id === dlgId) card.posted = false;
+  persist(); $('#dlgCard').close(); renderWall(); toast('카드를 뗐어요');
+}));
+$('#dlgCard').addEventListener('close', () => { Voice.stop(); playTok++; Sound.stop(); if (player) { try { player.pause(); } catch (e) {} } });
+
+/* ───────── 공통 단추와 설정 창 ───────── */
+D.addEventListener('click', e => {
+  const act = e.target.closest('[data-act]');
+  if (act) { if (act.dataset.act === 'voice') playVoice(act.dataset.id); else playPerf(findCard(act.dataset.id)); return; }
+  const say = e.target.closest('[data-say]'); if (say) { Voice.say(SAY[say.dataset.say]); return; }
+  const g = e.target.closest('[data-go]'); if (g && !g.disabled) { go(g.dataset.go); return; }
+  const cl = e.target.closest('[data-close]'); if (cl) { const d = cl.closest('dialog'); if (d) d.close(); return; }
+  if (e.target instanceof HTMLDialogElement) { const r = e.target.getBoundingClientRect(); if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) e.target.close(); }
+});
+$('#btnHome').addEventListener('click', () => go('home'));
+$('#btnWall').addEventListener('click', () => go('wall'));
+$('#btnHomeWall').addEventListener('click', () => go('wall'));
+$('#btnWallNew').addEventListener('click', () => go('mood'));
+$('#btnStart').addEventListener('click', () => { Sound.ensure(); go('mood'); });
+$('#btnSet').addEventListener('click', () => { applySettings(false); $('#clearConfirm').innerHTML = ''; $('#dlgSet').showModal(); });
+$('#btnPrev').addEventListener('click', () => { const i = STEPS.findIndex(s => s[0] === screen); go(i <= 0 ? 'home' : STEPS[i - 1][0]); });
+$('#btnNext').addEventListener('click', () => {
+  const i = STEPS.findIndex(s => s[0] === screen);
+  if (screen === 'mood' && !card.color) { toast('마음 색을 먼저 골라요'); return; }
+  if (i >= 0 && i < STEPS.length - 1) go(STEPS[i + 1][0]);
+});
+$('#inName').addEventListener('input', e => { card.name = e.target.value.trim().slice(0, 10); });
+$$('input[name="mode"], input[name="setMode"]').forEach(i => i.addEventListener('change', () => { if (i.checked) setMode(i.value); }));
+$$('input[name="setText"]').forEach(i => i.addEventListener('change', () => { if (i.checked) { S.text = i.value; applySettings(); } }));
+$$('input[name="setWords"]').forEach(i => i.addEventListener('change', () => {
+  if (!i.checked) return;
+  S.words = +i.value; applySettings();
+  if (card.color && !wordsFor(card.color).includes(card.word)) card.word = MOODS[card.color].words[0];
+  if (screen === 'mood') renderMood();
+  renderRail();
+}));
+[['swContrast', 'contrast'], ['swTts', 'tts'], ['swCap', 'captions'], ['swSound', 'sound'], ['swMotion', 'motion']].forEach(([id, key]) => {
+  $('#' + id).addEventListener('change', e => {
+    S[key] = e.target.checked;
+    if (key === 'tts' && !S.tts && S.mode === 'listen') S.mode = 'guide';
+    applySettings(); renderSteps();
+    if (key === 'tts' && S.tts) Voice.say('화면을 읽어 줄게요.');
+    if (key === 'sound' && screen === 'music') renderMusic();
+  });
+});
+$('#btnClearWall').addEventListener('click', () => askIn($('#clearConfirm'), '붙여 둔 카드를 모두 지울까요? 되돌릴 수 없어요.', '모두 지우기', () => {
+  wall = []; usedBefore = true; card.posted = false; persist();
+  if (screen === 'wall') renderWall(); if (screen === 'card') renderCardScreen();
+  renderSteps(); toast('우리 반 팔레트를 비웠어요');
+}));
+
+/* 듣기 모드: 손이나 초점이 닿은 단추의 이름을 읽어 줘요 */
+let lastSaid = null, lastSaidAt = 0;
+function readEl(target) {
+  if (!S.tts || !target || !target.closest) return;
+  const t = target.closest('button, [role="button"], summary, input[type="text"], textarea, label.mode, .seg label, label.switch');
+  if (!t || t.id === 'pad' || t.hasAttribute('data-say')) return;
+  const now = Date.now(); if (t === lastSaid && now - lastSaidAt < 900) return;
+  lastSaid = t; lastSaidAt = now;
+  const txt = (t.getAttribute('aria-label') || t.innerText || t.placeholder || '').replace(/\s+/g, ' ').trim().slice(0, 80);
+  if (txt) Voice.say(txt);
+}
+D.addEventListener('focusin', e => readEl(e.target));
+D.addEventListener('pointerdown', e => readEl(e.target), true);
+D.addEventListener('visibilitychange', () => {
+  if (!D.hidden) return;
+  quiet();
+  if (screen === 'photo') renderPhoto(); else if (screen === 'voice') renderVoice(); else if (screen === 'music') renderMusic(); else if (screen === 'calm') enterCalm();
+});
+
+/* ───────── 시작 ───────── */
+$('#brandMark').innerHTML = BRAND;
+$('#heroArt').innerHTML = heroSVG();
+$$('[data-ic]').forEach(i => { i.outerHTML = ic(i.dataset.ic); });
+$$('.say').forEach(b => { b.innerHTML = ic('speaker'); });
+$('#btnStt').innerHTML = ic('mic'); $('#btnRec').innerHTML = ic('rec');
+const off = (sel, why) => { const b = $(sel); b.disabled = true; $('small', b).textContent = why; };
+if (!hasMedia) { off('#tab-hunt', '이 화면에서는 카메라를 쓸 수 없어요'); off('#how-body', '이 화면에서는 카메라를 쓸 수 없어요'); }
+if (!SR) off('#tab-stt', '이 브라우저에서는 쓸 수 없어요');
+if (!canRec) off('#tab-rec', '이 화면에서는 쓸 수 없어요');
+if (!('DeviceMotionEvent' in window)) off('#how-shake', '이 기기에서는 쓸 수 없어요');
+Voice.init();
+applySettings(false);
+go(location.hash === '#wall' ? 'wall' : 'home', true);
+
+})();
+</script>
+</body>
+</html>
